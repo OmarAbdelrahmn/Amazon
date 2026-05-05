@@ -41,7 +41,18 @@ export default function AuthGuard({ children }) {
   return (
     <>
       {!isLoginPage && <Header />}
-      <main className="container animate-fade-in" style={{ padding: isLoginPage ? '0' : '2rem 1.5rem', maxWidth: isLoginPage ? '100%' : '1200px' }}>
+      <main
+        className="container animate-fade-in"
+        style={{
+          padding   : isLoginPage ? '0' : '2rem 0.75rem',
+          maxWidth  : isLoginPage ? '100%' : '1600px',
+          flex      : isLoginPage ? undefined : '1 1 0',
+          minHeight : isLoginPage ? undefined : '0',
+          overflow  : isLoginPage ? undefined : 'hidden',
+          display   : isLoginPage ? undefined : 'flex',
+          flexDirection: isLoginPage ? undefined : 'column',
+        }}
+      >
         {children}
       </main>
     </>

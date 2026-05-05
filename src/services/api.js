@@ -26,8 +26,16 @@ const fetchAPI = async (endpoint, options = {}) => {
       throw new Error('Session expired. Please log in again.');
     }
 
-    const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-    throw new Error(error.message || error.detail || 'API request failed');
+    const errorData = await response.json().catch(() => ({ message: 'An error occurred' }));
+    const errorMessage = errorData.detail || errorData.message || errorData.title || 'API request failed';
+    
+    const error = new Error(errorMessage);
+    error.status = response.status || errorData.status;
+    error.title = errorData.title;
+    error.type = errorData.type;
+    error.data = errorData;
+    
+    throw error;
   }
 
   return response.json();
@@ -42,7 +50,11 @@ export const apiService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials),
     });
-    if (!response.ok) throw new Error('Login failed');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.detail || errorData.message || errorData.title || 'Login failed';
+      throw new Error(errorMessage);
+    }
     // Read response text first in case it returns a plain string token
     const text = await response.text();
     try {

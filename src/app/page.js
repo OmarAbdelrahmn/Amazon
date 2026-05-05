@@ -8,7 +8,6 @@ export default function Home() {
   const { t } = useTranslation('common');
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -16,23 +15,11 @@ export default function Home() {
       setLoading(true);
       setError('');
       try {
-        // Note: As we don't have the exact shape of getStatistics yet, we will fetch what we can.
-        // We'll try to get today's report and employees count.
-        const employees = await apiService.getEmployees().catch(() => []);
-        
-        // We can aggregate stats from the employees list for now since we have the data structure
-        const activeOrders = employees.filter(e => e.isCurrentlyOnOrder).length;
-        const completedToday = employees.reduce((sum, e) => sum + (e.totalOrdersToday || 0), 0);
-
-        setStats({
-          activeOrders: activeOrders || 0,
-          totalEmployees: employees.length || 0,
-          completedToday: completedToday || 0,
-          revenue: 'N/A' // Placeholder until getStatistics shape is known
-        });
+        const data = await apiService.getStatistics();
+        setStats(data);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
-        setError('Failed to load dashboard statistics.');
+        setError(err.title || err.message || 'Failed to load dashboard statistics.');
       } finally {
         setLoading(false);
       }
@@ -45,7 +32,7 @@ export default function Home() {
     <div className="dashboard-wrapper">
       <div className="flex-between" style={{ marginBottom: '2rem' }}>
         <h1>{t('welcome')}</h1>
-        <button className="btn-primary">
+        <button className="btn-primary" onClick={() => window.location.href = '/employees'}>
           <span>+</span> {t('create_order')}
         </button>
       </div>
@@ -62,41 +49,174 @@ export default function Home() {
           ))}
         </div>
       ) : (
-        <div className="grid-auto">
-          <div className="glass-card">
-            <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('active_orders')}</h3>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-              {stats?.activeOrders}
+        <>
+          <div className="grid-auto">
+            <div className="glass-card stats-card">
+              <h3 className="stats-title">{t('active_orders')}</h3>
+              <div className="stats-value text-primary">{stats?.currentlyActiveOrders || 0}</div>
+            </div>
+            
+            <div className="glass-card stats-card">
+              <h3 className="stats-title">{t('today_report')}</h3>
+              <div className="stats-value text-success">{stats?.totalOrdersToday || 0}</div>
+            </div>
+            
+            <div className="glass-card stats-card">
+              <h3 className="stats-title">{t('employees')}</h3>
+              <div className="stats-value text-accent">{stats?.totalEligibleEmployees || 0}</div>
+            </div>
+            
+            <div className="glass-card stats-card">
+              <h3 className="stats-title">{t('avg_mins')}</h3>
+              <div className="stats-value">{stats?.averageMinutesPerOrder ? stats.averageMinutesPerOrder.toFixed(1) : 0}</div>
             </div>
           </div>
-          
-          <div className="glass-card">
-            <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('employees')}</h3>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-              {stats?.totalEmployees}
+
+          <div className="dashboard-grid">
+            <div className="glass-card">
+              <h3 className="card-title">{t('orders_by_month')}</h3>
+              <div className="chart-container">
+                {stats?.ordersByMonth && Object.entries(stats.ordersByMonth).map(([month, count]) => {
+                  const maxCount = Math.max(...Object.values(stats.ordersByMonth));
+                  const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                  return (
+                    <div key={month} className="chart-bar-wrapper">
+                      <div className="chart-label">{month}</div>
+                      <div className="chart-track">
+                        <div className="chart-fill" style={{ width: `${percentage}%` }}>
+                          <span className="chart-value">{count}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="glass-card">
+              <h3 className="card-title">{t('top_employees')}</h3>
+              <div className="employee-list">
+                {stats?.ordersByEmployee && Object.entries(stats.ordersByEmployee)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 5)
+                  .map(([name, count]) => (
+                    <div key={name} className="employee-item">
+                      <div className="emp-name">{name}</div>
+                      <div className="emp-stats">
+                        <span className="badge">{count} {t('orders')}</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
-          
-          <div className="glass-card">
-            <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('today_report')}</h3>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'var(--success)' }}>
-              {stats?.completedToday}
-            </div>
-          </div>
-          
-          <div className="glass-card">
-            <h3 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{t('statistics')}</h3>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
-              {stats?.revenue}
-            </div>
-          </div>
-        </div>
+        </>
       )}
 
       <style jsx>{`
         @keyframes pulse {
           0% { opacity: 0.6; }
           100% { opacity: 0.2; }
+        }
+        .stats-card {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .stats-title {
+          color: var(--text-secondary);
+          margin-bottom: 0.5rem;
+          font-size: 1rem;
+        }
+        .stats-value {
+          font-size: 2.5rem;
+          font-weight: bold;
+        }
+        .text-primary { color: var(--primary); }
+        .text-success { color: var(--success); }
+        .text-accent { color: var(--accent); }
+        
+        .dashboard-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+          margin-top: 1.5rem;
+        }
+        @media (max-width: 900px) {
+          .dashboard-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .card-title {
+          margin-bottom: 1.5rem;
+          font-size: 1.25rem;
+          color: var(--text);
+        }
+
+        .chart-container {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .chart-bar-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+        .chart-label {
+          width: 60px;
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+        }
+        .chart-track {
+          flex: 1;
+          height: 24px;
+          background: rgba(0,0,0,0.05);
+          border-radius: 4px;
+          overflow: hidden;
+        }
+        .chart-fill {
+          height: 100%;
+          background: var(--primary);
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          padding-right: 0.5rem;
+          min-width: 30px;
+          transition: width 0.5s ease;
+        }
+        .chart-value {
+          color: #000;
+          font-weight: 600;
+          font-size: 0.8rem;
+        }
+
+        .employee-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .employee-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .employee-item:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+        .emp-name {
+          font-weight: 500;
+        }
+        .badge {
+          background: rgba(0, 138, 0, 0.1);
+          color: var(--success);
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          font-weight: 600;
         }
       `}</style>
     </div>

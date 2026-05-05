@@ -1,174 +1,214 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState, use } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { apiService } from '@/services/api';
-import CreateOrderModal from '@/components/CreateOrderModal';
 
-export default function EmployeeDetailsPage({ params }) {
-  // In Next.js 15, params is a Promise, so we must unwrap it using React.use()
-  const resolvedParams = use(params);
-  const iqamaNo = resolvedParams.iqamaNo;
-  
+export default function EmployeeDetailsPage() {
   const { t, i18n } = useTranslation('common');
-  const [employee, setEmployee] = useState(null);
+  const params = useParams();
+  const router = useRouter();
+  const { iqamaNo } = params;
+  
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
-
-  const fetchEmployee = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await apiService.getEmployee(iqamaNo);
-      setEmployee(data);
-    } catch (err) {
-      setError(err.message || 'Failed to load employee details');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEmployee();
-  }, [iqamaNo]);
-
-  const handleOrderSuccess = () => {
-    setShowModal(false);
-    fetchEmployee(); // Refresh data
-  };
-
-  if (loading) return <div className="container animate-fade-in"><div className="glass-card">Loading...</div></div>;
-  if (error) return <div className="container animate-fade-in"><div className="error-alert">{error}</div></div>;
-  if (!employee) return <div className="container animate-fade-in">Employee not found</div>;
 
   const isArabic = i18n.language === 'ar';
 
+  useEffect(() => {
+    if (!iqamaNo) return;
+    const fetchHistory = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const historyData = await apiService.getEmployeeHistory(iqamaNo);
+        setData(historyData);
+      } catch (err) {
+        setError(err.title || err.message || 'Failed to load employee history.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [iqamaNo]);
+
   return (
-    <div className="employee-details-wrapper animate-fade-in">
+    <div className="employee-details-wrapper">
       <div className="flex-between" style={{ marginBottom: '2rem' }}>
-        <div>
-          <Link href="/employees" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '0.5rem', display: 'inline-block' }}>
-            &larr; Back to {t('employees')}
-          </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button className="btn-secondary" onClick={() => router.back()} style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}>
+            {isArabic ? '→' : '←'}
+          </button>
           <h1>{t('employee_details')}</h1>
         </div>
-        <button className="btn-primary" onClick={() => setShowModal(true)}>
-          + {t('create_order')}
-        </button>
       </div>
 
-      <div className="grid-auto">
-        <div className="glass-card">
-          <div className="profile-header">
-            <div className="avatar">{isArabic ? employee.nameAR.charAt(0) : employee.nameEN.charAt(0)}</div>
-            <div>
-              <h2>{isArabic ? employee.nameAR : employee.nameEN}</h2>
-              <p style={{ color: 'var(--text-secondary)' }}>{employee.jobTitle}</p>
-            </div>
-          </div>
-          
-          <div className="details-grid">
-            <div className="detail-item">
-              <label>{t('iqama_no')}</label>
-              <span>{employee.iqamaNo}</span>
-            </div>
-            <div className="detail-item">
-              <label>{t('status')}</label>
-              <span className={`status-badge ${employee.isCurrentlyOnOrder ? 'active' : 'idle'}`}>
-                {employee.isCurrentlyOnOrder ? t('on_order') : t('available')}
-              </span>
-            </div>
-            <div className="detail-item">
-              <label>{t('country')}</label>
-              <span>{employee.country}</span>
-            </div>
-            <div className="detail-item">
-              <label>Phone</label>
-              <span dir="ltr" style={{ textAlign: isArabic ? 'right' : 'left' }}>{employee.phone}</span>
-            </div>
-            <div className="detail-item">
-              <label>{t('housing')}</label>
-              <span>{employee.housingName}</span>
-            </div>
-            <div className="detail-item">
-              <label>Working ID</label>
-              <span>{employee.workingId}</span>
-            </div>
-          </div>
-        </div>
+      {error && <div className="error-alert">{error}</div>}
 
-        <div className="glass-card">
-          <h3 style={{ marginBottom: '1.5rem' }}>Order Activity</h3>
-          
-          <div className="activity-stats">
-            <div className="stat-box">
-              <label>{t('total_orders_today')}</label>
-              <div className="value">{employee.totalOrdersToday}</div>
+      {loading ? (
+        <div className="loading-state">{t('status')}...</div>
+      ) : data ? (
+        <>
+          <div className="profile-header glass-card">
+            <div className="profile-info">
+              <h2>{isArabic ? data.nameAR : data.nameEN}</h2>
+              <div className="profile-badges">
+                <span className="badge tag">{data.jobTitle}</span>
+                <span className="badge tag">{data.country}</span>
+                <span className={`badge ${data.currentStatus === 'enable' ? 'success' : 'idle'}`}>
+                  {data.currentStatus}
+                </span>
+              </div>
+              <p className="text-secondary mt-1">{t('iqama_no')}: {data.iqamaNo} • {t('housing')}: {data.housingName}</p>
+            </div>
+            <div className="profile-stats">
+              <div className="stat-box">
+                <div className="stat-label">{t('total_orders_all_time')}</div>
+                <div className="stat-val">{data.totalOrders}</div>
+              </div>
+              <div className="stat-box">
+                <div className="stat-label">{t('avg_mins')}</div>
+                <div className="stat-val">{data.averageMinutesPerOrder ? data.averageMinutesPerOrder.toFixed(1) : 0}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="history-section glass-card" style={{ marginTop: '1.5rem', padding: '0' }}>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }}>
+              <h3>{t('employee_history')}</h3>
             </div>
             
-            {employee.isCurrentlyOnOrder && (
-              <div className="stat-box active-order">
-                <label>Current Order Started</label>
-                <div className="value" style={{ fontSize: '1.2rem', marginTop: '0.5rem' }}>
-                  {new Date(employee.currentOrderStartedAt).toLocaleTimeString()}
-                </div>
+            {data.orders && data.orders.length > 0 ? (
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>{t('orders')} ID</th>
+                      <th>{t('started_at')}</th>
+                      <th>{t('ended_at')}</th>
+                      <th>{t('duration_mins')}</th>
+                      <th>{t('status')}</th>
+                      <th>{t('notes')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.orders.map(order => (
+                      <tr key={order.id}>
+                        <td>#{order.id}</td>
+                        <td>{new Date(order.startedAt).toLocaleString(i18n.language)}</td>
+                        <td>{order.endedAt ? new Date(order.endedAt).toLocaleString(i18n.language) : '-'}</td>
+                        <td>{order.durationMinutes ? order.durationMinutes.toFixed(1) : '-'}</td>
+                        <td>
+                          <span className={`status-badge ${order.order ? 'active' : 'idle'}`}>
+                            {order.order ? t('on_order') : t('available')}
+                          </span>
+                        </td>
+                        <td className="text-secondary">{order.notes || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            ) : (
+              <div className="empty-state">{t('no_data')}</div>
             )}
           </div>
-        </div>
-      </div>
-
-      {showModal && (
-        <CreateOrderModal 
-          employee={employee} 
-          onClose={() => setShowModal(false)} 
-          onSuccess={handleOrderSuccess} 
-        />
-      )}
+        </>
+      ) : null}
 
       <style jsx>{`
         .profile-header {
           display: flex;
+          justify-content: space-between;
           align-items: center;
+          gap: 2rem;
+          flex-wrap: wrap;
+        }
+        .profile-info h2 {
+          margin-bottom: 0.5rem;
+          font-size: 1.8rem;
+        }
+        .profile-badges {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+        .badge {
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 600;
+        }
+        .badge.tag {
+          background: rgba(0,0,0,0.05);
+          color: var(--text-secondary);
+        }
+        .badge.success {
+          background: rgba(0, 138, 0, 0.1);
+          color: var(--success);
+        }
+        .badge.idle {
+          background: rgba(113, 113, 113, 0.1);
+          color: var(--text-secondary);
+        }
+        .mt-1 { margin-top: 1rem; }
+        .text-secondary { color: var(--text-secondary); }
+        
+        .profile-stats {
+          display: flex;
           gap: 1.5rem;
-          margin-bottom: 2rem;
-          padding-bottom: 1.5rem;
+        }
+        .stat-box {
+          background: rgba(0,0,0,0.02);
+          padding: 1rem 1.5rem;
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          min-width: 120px;
+        }
+        .stat-label {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          margin-bottom: 0.5rem;
+        }
+        .stat-val {
+          font-size: 1.5rem;
+          font-weight: bold;
+          color: var(--primary);
+        }
+
+        .table-container {
+          overflow-x: auto;
+        }
+        .data-table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        [dir="rtl"] .data-table {
+          text-align: right;
+        }
+        .data-table th, .data-table td {
+          padding: 1rem 1.5rem;
           border-bottom: 1px solid var(--border);
         }
-        .avatar {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          background: var(--primary);
-          color: #000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2.5rem;
-          font-weight: bold;
-        }
-        .details-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1.5rem;
-        }
-        .detail-item label {
-          display: block;
+        .data-table th {
           color: var(--text-secondary);
-          font-size: 0.85rem;
-          margin-bottom: 0.25rem;
+          font-weight: 600;
+          background: rgba(0,0,0,0.02);
         }
-        .detail-item span {
-          font-weight: 500;
+        .data-table tbody tr:last-child td {
+          border-bottom: none;
+        }
+        .data-table tbody tr:hover {
+          background: rgba(0,0,0,0.01);
         }
         .status-badge {
           padding: 0.25rem 0.75rem;
           border-radius: 20px;
           font-size: 0.85rem;
           font-weight: 600;
-          display: inline-block;
         }
         .status-badge.active {
           background: rgba(0, 138, 0, 0.1);
@@ -178,36 +218,19 @@ export default function EmployeeDetailsPage({ params }) {
           background: rgba(113, 113, 113, 0.1);
           color: var(--text-secondary);
         }
-        .activity-stats {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        .stat-box {
-          background: rgba(0,0,0,0.02);
-          padding: 1.5rem;
-          border-radius: var(--radius);
-          border: 1px solid var(--border);
-        }
-        .stat-box label {
+        .empty-state {
+          padding: 3rem;
+          text-align: center;
           color: var(--text-secondary);
-          font-size: 0.9rem;
         }
-        .stat-box .value {
-          font-size: 2rem;
-          font-weight: bold;
+        .btn-secondary {
+          border: 1px solid var(--border);
+          background: var(--surface);
           color: var(--text);
-          margin-top: 0.25rem;
+          cursor: pointer;
         }
-        .active-order {
-          background: rgba(255, 153, 0, 0.05);
-          border-color: rgba(255, 153, 0, 0.3);
-        }
-        .error-alert {
-          background: rgba(186, 0, 13, 0.1);
-          color: var(--error);
-          padding: 0.75rem;
-          border-radius: 4px;
+        .btn-secondary:hover {
+          background: rgba(0,0,0,0.05);
         }
       `}</style>
     </div>
