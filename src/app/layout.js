@@ -11,8 +11,27 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata = {
-  title: "Amazon Logistics Dashboard",
-  description: "Advanced order management and reporting system",
+  title: 'Express Service - Smart Logistics Solution',
+  description: 'Express Service is a comprehensive Logistics Management System designed to streamline delivery operations. Manage riders, track shipments, and generate detailed reports efficiently.',
+  metadataBase: new URL('https://forsenex.com'),
+  icons: {
+    icon: '/5.png',
+  },
+  manifest: '/manifest.json',
+  openGraph: {
+    title: 'Express Service - Smart Logistics Solution',
+    description: 'Express Service is a comprehensive Logistics Management System designed to streamline delivery operations. Manage riders, track shipments, and generate detailed reports efficiently.',
+    siteName: 'Express Service',
+    images: [
+      {
+        url: '/5.png',
+        width: 1200,
+        height: 630,
+        alt: 'Express Service Dashboard',
+      },
+    ],
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }) {

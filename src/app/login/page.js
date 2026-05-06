@@ -46,20 +46,17 @@ export default function LoginPage() {
       <div className="lp-brand">
         <div className="lp-brand-inner">
           <div className="lp-logo">
-            <svg viewBox="0 0 48 48" fill="none">
-              <rect width="48" height="48" rx="12" fill="var(--primary)" />
-              <path d="M12 15h24M12 24h16M12 33h20" stroke="#000" strokeWidth="3.5" strokeLinecap="round"/>
-            </svg>
+            <img src="/5.png" alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'cover' }} />
             <div>
-              <div className="lp-brand-name">Amazon</div>
-              <div className="lp-brand-tagline">Logistics Dashboard</div>
+              <div className="lp-brand-name">Express</div>
+              <div className="lp-brand-tagline">Service</div>
             </div>
           </div>
 
           <div className="lp-brand-headline">
-            <span className="lp-headline-word">Command</span>
-            <span className="lp-headline-word lp-headline-word--accent">every</span>
-            <span className="lp-headline-word">delivery.</span>
+            <span className="lp-headline-word">Smart</span>
+            <span className="lp-headline-word lp-headline-word--accent">Logistics</span>
+            <span className="lp-headline-word">Solution.</span>
           </div>
 
           <p className="lp-brand-desc">

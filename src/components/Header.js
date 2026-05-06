@@ -31,7 +31,7 @@ export default function Header() {
     window.location.href = '/login';
   };
 
-  if (!mounted) return <header style={{ height: '60px', background: 'var(--secondary)' }} />;
+  if (!mounted) return <header style={{ height: '80px', background: 'var(--secondary)' }} />;
 
   return (
     <header>
@@ -39,14 +39,11 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="hdr-logo">
           <div className="hdr-logo-mark">
-            <svg viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="var(--primary)" />
-              <path d="M8 10h16M8 16h10M8 22h13" stroke="#000" strokeWidth="2.5" strokeLinecap="round"/>
-            </svg>
+            <img src="/5.png" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
           </div>
           <div className="hdr-logo-text">
-            <span className="hdr-logo-brand">Amazon</span>
-            <span className="hdr-logo-sub">Logistics</span>
+            <span className="hdr-logo-brand">Express</span>
+            <span className="hdr-logo-sub">Service</span>
           </div>
         </Link>
 
@@ -96,7 +93,7 @@ export default function Header() {
       <style jsx>{`
         header {
           background: var(--secondary);
-          height: 60px;
+          height: 80px;
           display: flex;
           align-items: center;
         }
@@ -200,8 +197,15 @@ export default function Header() {
         .hdr-logout svg { width: 15px; height: 15px; }
 
         @media (max-width: 768px) {
+          .hdr-inner { gap: 0.75rem; padding: 0 0.5rem; }
           .hdr-logo-text { display: none; }
-          .hdr-nav-link { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+          .hdr-nav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+          .hdr-nav::-webkit-scrollbar { display: none; }
+          .hdr-nav ul { gap: 0.2rem; }
+          .hdr-nav-link { padding: 0.35rem 0.5rem; font-size: 0.8rem; white-space: nowrap; }
+          .hdr-actions { gap: 0.4rem; }
+          .lang-btn { padding: 0.25rem 0.4rem; font-size: 0.75rem; }
+          .hdr-logout { width: 30px; height: 30px; }
         }
       `}</style>
     </header>

@@ -19,18 +19,18 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fastexpress.tryasp.
  */
 export default function RiderSelector({
   onSelect,
-  submittingId  = null,
-  successId     = null,
+  submittingId = null,
+  successId = null,
   externalRiders = null,
   loadingExternal = false,
 }) {
   const { t, i18n } = useTranslation('common');
   const isRtl = i18n.language === 'ar';
 
-  const [riders,  setRiders]  = useState([]);
+  const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState('');
-  const [notes,   setNotes]   = useState({}); // { [iqamaNo]: string }
+  const [error, setError] = useState('');
+  const [notes, setNotes] = useState({}); // { [iqamaNo]: string }
 
   /* ── fetch (only when no external data provided) ─────────────── */
   useEffect(() => {
@@ -47,8 +47,8 @@ export default function RiderSelector({
     })();
   }, [externalRiders]);
 
-  const displayRiders  = externalRiders ?? riders;
-  const isLoading      = externalRiders !== null ? loadingExternal : loading;
+  const displayRiders = externalRiders ?? riders;
+  const isLoading = externalRiders !== null ? loadingExternal : loading;
 
   /* ── helpers ──────────────────────────────────────────────────── */
   const handleNote = (id, value) =>
@@ -82,10 +82,10 @@ export default function RiderSelector({
       ) : (
         <div className="rs-grid">
           {displayRiders.map(rider => {
-            const imgSrc      = avatarSrc(rider);
+            const imgSrc = avatarSrc(rider);
             const isSubmitting = submittingId === rider.iqamaNo;
-            const isSuccess    = successId    === rider.iqamaNo;
-            const isDisabled   = !!submittingId && !isSubmitting;
+            const isSuccess = successId === rider.iqamaNo;
+            const isDisabled = !!submittingId && !isSubmitting;
 
             return (
               <div
@@ -93,8 +93,8 @@ export default function RiderSelector({
                 className={[
                   'rs-card',
                   isSubmitting ? 'rs-card--submitting' : '',
-                  isSuccess    ? 'rs-card--success'    : '',
-                  isDisabled   ? 'rs-card--dimmed'     : '',
+                  isSuccess ? 'rs-card--success' : '',
+                  isDisabled ? 'rs-card--dimmed' : '',
                 ].join(' ')}
               >
                 {/* ── clickable image area ── */}
@@ -132,7 +132,7 @@ export default function RiderSelector({
                           <div className="rs-spinner" />
                         ) : (
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                               strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
                         )}
