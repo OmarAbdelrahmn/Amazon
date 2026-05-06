@@ -7,7 +7,9 @@ import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
+  const isArabic = i18n.language === 'ar';
+  const dir = isArabic ? 'rtl' : 'ltr';
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -41,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="lp-root">
+    <div className="lp-root" dir={dir}>
       {/* Left panel — brand */}
       <div className="lp-brand">
         <div className="lp-brand-inner">
@@ -54,29 +56,29 @@ export default function LoginPage() {
           </div>
 
           <div className="lp-brand-headline">
-            <span className="lp-headline-word">Smart</span>
-            <span className="lp-headline-word lp-headline-word--accent">Logistics</span>
-            <span className="lp-headline-word">Solution.</span>
+            <span className="lp-headline-word">{t('login_headline_1')}</span>
+            <span className="lp-headline-word lp-headline-word--accent">{t('login_headline_2')}</span>
+            <span className="lp-headline-word">{t('login_headline_3')}</span>
           </div>
 
           <p className="lp-brand-desc">
-            Real-time order tracking, rider management, and performance analytics in one place.
+            {t('login_desc')}
           </p>
 
           <div className="lp-stats-row">
             <div className="lp-stat">
               <span className="lp-stat-val">99.8%</span>
-              <span className="lp-stat-label">Uptime</span>
+              <span className="lp-stat-label">{t('login_uptime')}</span>
             </div>
             <div className="lp-stat-divider" />
             <div className="lp-stat">
-              <span className="lp-stat-val">Live</span>
-              <span className="lp-stat-label">Real-time sync</span>
+              <span className="lp-stat-val">{t('login_live')}</span>
+              <span className="lp-stat-label">{t('login_sync')}</span>
             </div>
             <div className="lp-stat-divider" />
             <div className="lp-stat">
               <span className="lp-stat-val">AR / EN</span>
-              <span className="lp-stat-label">Bilingual</span>
+              <span className="lp-stat-label">{t('login_bilingual')}</span>
             </div>
           </div>
         </div>
@@ -93,8 +95,8 @@ export default function LoginPage() {
       <div className="lp-form-panel">
         <div className="lp-form-card animate-fade-in">
           <div className="lp-form-header">
-            <h2>Welcome back</h2>
-            <p>Sign in to your operations account</p>
+            <h2>{t('login_welcome')}</h2>
+            <p>{t('login_subtitle')}</p>
           </div>
 
           {error && (
@@ -108,7 +110,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="lp-field">
-              <label>Username</label>
+              <label>{t('username')}</label>
               <div className="lp-input-wrap">
                 <svg className="lp-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -118,7 +120,7 @@ export default function LoginPage() {
                   className="input-field lp-input"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  placeholder="Enter your username"
+                  placeholder={t('username')}
                   required
                   autoComplete="username"
                 />
@@ -126,7 +128,7 @@ export default function LoginPage() {
             </div>
 
             <div className="lp-field">
-              <label>Password</label>
+              <label>{t('password')}</label>
               <div className="lp-input-wrap">
                 <svg className="lp-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -136,7 +138,7 @@ export default function LoginPage() {
                   className="input-field lp-input"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder={t('password')}
                   required
                   autoComplete="current-password"
                 />
@@ -167,11 +169,11 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <span className="lp-spinner" />
-                  Signing in…
+                  {t('sign_in')}…
                 </>
               ) : (
                 <>
-                  Sign In
+                  {t('sign_in')}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                   </svg>
@@ -361,10 +363,14 @@ export default function LoginPage() {
           color: var(--text-tertiary);
           pointer-events: none;
         }
+        [dir="rtl"] .lp-input-icon { left: auto; right: 0.9rem; }
+        
         .lp-input {
           padding-left: 2.5rem;
           height: 46px;
         }
+        [dir="rtl"] .lp-input { padding-left: 1rem; padding-right: 2.5rem; }
+        
         .lp-eye-btn {
           position: absolute;
           right: 0.75rem;
@@ -379,6 +385,7 @@ export default function LoginPage() {
           border-radius: 4px;
           transition: color 0.15s;
         }
+        [dir="rtl"] .lp-eye-btn { right: auto; left: 0.75rem; }
         .lp-eye-btn:hover { color: var(--text-secondary); }
         .lp-eye-btn svg { width: 16px; height: 16px; }
 
@@ -402,6 +409,7 @@ export default function LoginPage() {
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ── Tablet (≤900px) ── */
         @media (max-width: 900px) {
           .lp-root { flex-direction: column; }
           .lp-brand { padding: 3rem 2rem 2rem; min-height: 300px; }
@@ -410,6 +418,39 @@ export default function LoginPage() {
           .lp-logo { margin-bottom: 1rem; }
           .lp-brand-desc { display: none; }
           .lp-stats-row { display: none; }
+        }
+
+        /* ── Mobile (≤640px) ── */
+        @media (max-width: 640px) {
+          .lp-root { flex-direction: column; min-height: 100dvh; }
+
+          /* Compact brand strip */
+          .lp-brand {
+            padding: 1.5rem 1.25rem;
+            min-height: unset;
+            flex-shrink: 0;
+          }
+          .lp-brand-inner { max-width: 100%; }
+          .lp-logo { margin-bottom: 0; gap: 0.6rem; }
+          .lp-brand-name { font-size: 1rem; }
+          .lp-brand-tagline { font-size: 0.6rem; }
+          .lp-brand-headline { display: none; }
+          .lp-brand-desc { display: none; }
+          .lp-stats-row { display: none; }
+
+          /* Form panel fills remaining space */
+          .lp-form-panel {
+            width: 100%;
+            flex: 1;
+            padding: 2rem 1.25rem 2.5rem;
+            align-items: flex-start;
+          }
+          .lp-form-card { max-width: 100%; }
+          .lp-form-header { margin-bottom: 1.75rem; }
+          .lp-form-header h2 { font-size: 1.45rem; }
+          .lp-input { height: 50px; font-size: 1rem; }
+          .lp-submit-btn { height: 52px; font-size: 1rem; }
+          .lp-field label { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; display: block; }
         }
       `}</style>
     </div>

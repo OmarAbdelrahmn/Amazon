@@ -40,7 +40,7 @@ export default function ReportsPage() {
 
   return (
     <div className="reports-wrapper">
-      <div className="flex-between" style={{ marginBottom: '2rem' }}>
+      <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
         <h1>{t('reports')}</h1>
       </div>
 
@@ -164,99 +164,77 @@ export default function ReportsPage() {
       )}
 
       <style jsx>{`
-        .report-form {
-          width: 100%;
-        }
+        .report-form { width: 100%; }
         .form-row {
           display: flex;
-          gap: 1.5rem;
+          gap: 1.25rem;
           align-items: flex-end;
           flex-wrap: wrap;
         }
-        .form-group {
-          flex: 1;
-          min-width: 200px;
-        }
-        .form-actions {
-          flex: 0 0 auto;
-        }
+        .form-group { flex: 1; min-width: 180px; }
+        .form-actions { flex: 0 0 auto; }
         label {
           display: block;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.45rem;
           color: var(--text-secondary);
           font-weight: 500;
-          font-size: 0.9rem;
+          font-size: 0.88rem;
         }
-        
+
         .summary-box {
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
           text-align: center;
-          padding: 1.5rem;
+          padding: 1.25rem 1rem;
         }
         .stat-label {
           color: var(--text-secondary);
           margin-bottom: 0.5rem;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
+          text-align: center;
         }
-        .stat-val {
-          font-size: 2rem;
-          font-weight: bold;
-        }
+        .stat-val { font-size: 2rem; font-weight: bold; }
         .text-primary { color: var(--primary); }
         .text-accent { color: var(--accent); }
 
         .table-header {
-          padding: 1.5rem;
+          padding: 1.25rem 1.5rem;
           border-bottom: 1px solid var(--border);
           background: rgba(0,0,0,0.02);
         }
-        .table-header h3 {
-          margin: 0;
-          font-size: 1.1rem;
-        }
-        .table-container {
-          overflow-x: auto;
-        }
-        .data-table {
-          width: 100%;
-          border-collapse: collapse;
-          text-align: left;
-        }
-        [dir="rtl"] .data-table {
-          text-align: right;
-        }
+        .table-header h3 { margin: 0; font-size: 1.05rem; }
+        .table-container { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        [dir="rtl"] .data-table { text-align: right; }
         .data-table th, .data-table td {
-          padding: 1rem 1.5rem;
+          padding: 0.85rem 1.25rem;
           border-bottom: 1px solid var(--border);
+          white-space: nowrap;
         }
         .data-table th {
           color: var(--text-secondary);
           font-weight: 600;
-          font-size: 0.85rem;
+          font-size: 0.78rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
-        .data-table tbody tr:last-child td {
-          border-bottom: none;
-        }
-        .data-table tbody tr:hover {
-          background: rgba(0,0,0,0.01);
-        }
-        .font-medium {
-          font-weight: 500;
-        }
-        .badge {
-          padding: 0.2rem 0.5rem;
-          border-radius: 4px;
-          font-size: 0.85rem;
-          font-weight: 600;
-        }
-        .badge.success {
-          background: rgba(0, 138, 0, 0.1);
-          color: var(--success);
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover { background: rgba(0,0,0,0.01); }
+        .font-medium { font-weight: 500; }
+        .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.82rem; font-weight: 600; }
+        .badge.success { background: rgba(0,138,0,0.1); color: var(--success); }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+          .form-row { flex-direction: column; gap: 0.9rem; }
+          .form-group { min-width: 0; width: 100%; }
+          .form-actions { width: 100%; }
+          .form-actions .btn-primary { width: 100%; justify-content: center; }
+          .stat-val { font-size: 1.6rem; }
+          .table-header { padding: 1rem; }
+          .data-table th, .data-table td { padding: 0.65rem 0.9rem; font-size: 0.82rem; }
         }
       `}</style>
     </div>

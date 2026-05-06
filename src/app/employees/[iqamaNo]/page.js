@@ -36,9 +36,9 @@ export default function EmployeeDetailsPage() {
 
   return (
     <div className="employee-details-wrapper">
-      <div className="flex-between" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button className="btn-secondary" onClick={() => router.back()} style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}>
+      <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button className="btn-secondary" onClick={() => router.back()} style={{ borderRadius: '50%', width: '38px', height: '38px', padding: 0, flexShrink: 0 }}>
             {isArabic ? '→' : '←'}
           </button>
           <h1>{t('employee_details')}</h1>
@@ -123,114 +123,71 @@ export default function EmployeeDetailsPage() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 2rem;
+          gap: 1.5rem;
           flex-wrap: wrap;
         }
-        .profile-info h2 {
-          margin-bottom: 0.5rem;
-          font-size: 1.8rem;
-        }
-        .profile-badges {
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-        }
+        .profile-info h2 { margin-bottom: 0.5rem; font-size: 1.5rem; }
+        .profile-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .badge {
-          padding: 0.25rem 0.75rem;
+          padding: 0.2rem 0.65rem;
           border-radius: 20px;
-          font-size: 0.85rem;
+          font-size: 0.82rem;
           font-weight: 600;
         }
-        .badge.tag {
-          background: rgba(0,0,0,0.05);
-          color: var(--text-secondary);
-        }
-        .badge.success {
-          background: rgba(0, 138, 0, 0.1);
-          color: var(--success);
-        }
-        .badge.idle {
-          background: rgba(113, 113, 113, 0.1);
-          color: var(--text-secondary);
-        }
-        .mt-1 { margin-top: 1rem; }
+        .badge.tag { background: rgba(0,0,0,0.05); color: var(--text-secondary); }
+        .badge.success { background: rgba(0,138,0,0.1); color: var(--success); }
+        .badge.idle { background: rgba(113,113,113,0.1); color: var(--text-secondary); }
+        .mt-1 { margin-top: 0.75rem; }
         .text-secondary { color: var(--text-secondary); }
-        
-        .profile-stats {
-          display: flex;
-          gap: 1.5rem;
-        }
+
+        .profile-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
         .stat-box {
           background: rgba(0,0,0,0.02);
-          padding: 1rem 1.5rem;
+          padding: 0.9rem 1.25rem;
           border-radius: 12px;
           border: 1px solid var(--border);
-          min-width: 120px;
+          min-width: 110px;
         }
-        .stat-label {
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-          margin-bottom: 0.5rem;
-        }
-        .stat-val {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: var(--primary);
-        }
+        .stat-label { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.4rem; }
+        .stat-val { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
 
-        .table-container {
-          overflow-x: auto;
-        }
-        .data-table {
-          width: 100%;
-          border-collapse: collapse;
-          text-align: left;
-        }
-        [dir="rtl"] .data-table {
-          text-align: right;
-        }
+        .table-container { overflow-x: auto; }
+        .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        [dir="rtl"] .data-table { text-align: right; }
         .data-table th, .data-table td {
-          padding: 1rem 1.5rem;
+          padding: 0.85rem 1.25rem;
           border-bottom: 1px solid var(--border);
+          white-space: nowrap;
         }
-        .data-table th {
-          color: var(--text-secondary);
-          font-weight: 600;
-          background: rgba(0,0,0,0.02);
-        }
-        .data-table tbody tr:last-child td {
-          border-bottom: none;
-        }
-        .data-table tbody tr:hover {
-          background: rgba(0,0,0,0.01);
-        }
+        .data-table th { color: var(--text-secondary); font-weight: 600; background: rgba(0,0,0,0.02); font-size: 0.8rem; }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover { background: rgba(0,0,0,0.01); }
         .status-badge {
-          padding: 0.25rem 0.75rem;
+          padding: 0.2rem 0.65rem;
           border-radius: 20px;
-          font-size: 0.85rem;
+          font-size: 0.82rem;
           font-weight: 600;
         }
-        .status-badge.active {
-          background: rgba(0, 138, 0, 0.1);
-          color: var(--success);
-        }
-        .status-badge.idle {
-          background: rgba(113, 113, 113, 0.1);
-          color: var(--text-secondary);
-        }
-        .empty-state {
-          padding: 3rem;
-          text-align: center;
-          color: var(--text-secondary);
-        }
+        .status-badge.active { background: rgba(0,138,0,0.1); color: var(--success); }
+        .status-badge.idle { background: rgba(113,113,113,0.1); color: var(--text-secondary); }
+        .empty-state { padding: 3rem; text-align: center; color: var(--text-secondary); }
         .btn-secondary {
           border: 1px solid var(--border);
           background: var(--surface);
           color: var(--text);
           cursor: pointer;
+          font-size: 1.1rem;
         }
-        .btn-secondary:hover {
-          background: rgba(0,0,0,0.05);
+        .btn-secondary:hover { background: rgba(0,0,0,0.05); }
+
+        /* ── Mobile ── */
+        @media (max-width: 640px) {
+          .profile-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+          .profile-info h2 { font-size: 1.25rem; }
+          .profile-stats { width: 100%; }
+          .stat-box { flex: 1; min-width: 100px; }
+          .stat-val { font-size: 1.25rem; }
+          .data-table th, .data-table td { padding: 0.65rem 0.85rem; font-size: 0.8rem; }
         }
       `}</style>
     </div>

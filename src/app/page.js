@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import { apiService } from '@/services/api';
 
 export default function Home() {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
+  const isArabic = i18n.language === 'ar';
+  const dir = isArabic ? 'rtl' : 'ltr';
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,12 +31,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="dashboard-wrapper">
-      <div className="flex-between" style={{ marginBottom: '2rem' }}>
+    <div className="dashboard-wrapper" dir={dir}>
+      <div style={{ marginBottom: '1.5rem' }}>
         <h1>{t('welcome')}</h1>
-        <button className="btn-primary" onClick={() => window.location.href = '/employees'}>
-          <span>+</span> {t('create_order')}
-        </button>
       </div>
 
       {error && <div className="error-alert" style={{ marginBottom: '1.5rem' }}>{error}</div>}
@@ -126,7 +125,7 @@ export default function Home() {
         .stats-title {
           color: var(--text-secondary);
           margin-bottom: 0.5rem;
-          font-size: 1rem;
+          font-size: 0.95rem;
         }
         .stats-value {
           font-size: 2.5rem;
@@ -135,7 +134,7 @@ export default function Home() {
         .text-primary { color: var(--primary); }
         .text-success { color: var(--success); }
         .text-accent { color: var(--accent); }
-        
+
         .dashboard-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -143,9 +142,7 @@ export default function Home() {
           margin-top: 1.5rem;
         }
         @media (max-width: 900px) {
-          .dashboard-grid {
-            grid-template-columns: 1fr;
-          }
+          .dashboard-grid { grid-template-columns: 1fr; }
         }
         .card-title {
           margin-bottom: 1.5rem;
@@ -156,21 +153,22 @@ export default function Home() {
         .chart-container {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.9rem;
         }
         .chart-bar-wrapper {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: 0.75rem;
         }
         .chart-label {
-          width: 60px;
-          font-size: 0.85rem;
+          width: 52px;
+          flex-shrink: 0;
+          font-size: 0.8rem;
           color: var(--text-secondary);
         }
         .chart-track {
           flex: 1;
-          height: 24px;
+          height: 22px;
           background: rgba(0,0,0,0.05);
           border-radius: 4px;
           overflow: hidden;
@@ -188,13 +186,13 @@ export default function Home() {
         .chart-value {
           color: #000;
           font-weight: 600;
-          font-size: 0.8rem;
+          font-size: 0.78rem;
         }
 
         .employee-list {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.9rem;
         }
         .employee-item {
           display: flex;
@@ -202,21 +200,34 @@ export default function Home() {
           align-items: center;
           padding-bottom: 0.75rem;
           border-bottom: 1px solid var(--border);
+          gap: 0.5rem;
         }
+        /* RTL: reverse the name / badge order */
+        [dir="rtl"] .employee-item { flex-direction: row-reverse; }
         .employee-item:last-child {
           border-bottom: none;
           padding-bottom: 0;
         }
         .emp-name {
           font-weight: 500;
+          font-size: 0.9rem;
         }
         .badge {
           background: rgba(0, 138, 0, 0.1);
           color: var(--success);
           padding: 0.25rem 0.5rem;
           border-radius: 4px;
-          font-size: 0.85rem;
+          font-size: 0.82rem;
           font-weight: 600;
+          flex-shrink: 0;
+        }
+
+        /* ── Mobile overrides ── */
+        @media (max-width: 480px) {
+          .stats-value { font-size: 1.9rem; }
+          .stats-title { font-size: 0.82rem; }
+          .card-title { font-size: 1.05rem; margin-bottom: 1rem; }
+          .dashboard-grid { gap: 1rem; margin-top: 1rem; }
         }
       `}</style>
     </div>

@@ -9,10 +9,16 @@ export default function Header() {
   const { t, i18n } = useTranslation('common');
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close drawer on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
@@ -47,8 +53,8 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Navigation */}
-        <nav className="hdr-nav">
+        {/* Desktop Navigation */}
+        <nav className="hdr-nav-desktop">
           <ul>
             {navLinks.map(link => (
               <li key={link.href}>
@@ -69,15 +75,11 @@ export default function Header() {
             <button
               className={`lang-btn ${i18n.language === 'en' ? 'active' : ''}`}
               onClick={() => changeLanguage('en')}
-            >
-              EN
-            </button>
+            >EN</button>
             <button
               className={`lang-btn ${i18n.language === 'ar' ? 'active' : ''}`}
               onClick={() => changeLanguage('ar')}
-            >
-              عربي
-            </button>
+            >عربي</button>
           </div>
 
           <button className="hdr-logout" onClick={handleLogout} title="Sign out">
@@ -87,25 +89,60 @@ export default function Header() {
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
           </button>
+
+          {/* Hamburger — mobile only */}
+          <button
+            className="hdr-burger"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={menuOpen}
+          >
+            <span className={`hdr-burger-bar ${menuOpen ? 'open-1' : ''}`} />
+            <span className={`hdr-burger-bar ${menuOpen ? 'open-2' : ''}`} />
+            <span className={`hdr-burger-bar ${menuOpen ? 'open-3' : ''}`} />
+          </button>
         </div>
       </div>
+
+      {/* Mobile nav drawer */}
+      {menuOpen && (
+        <nav className="hdr-mobile-nav" aria-label="Mobile navigation">
+          <ul>
+            {navLinks.map(link => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={`hdr-mobile-link ${pathname === link.href ? 'hdr-mobile-link--active' : ''}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <span className="hdr-mobile-icon">{link.icon}</span>
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
 
       <style jsx>{`
         header {
           background: var(--secondary);
-          height: 80px;
-          display: flex;
-          align-items: center;
+          color: #fff;
+          position: sticky;
+          top: 0;
+          height: 70px;
+          z-index: 100;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .hdr-inner {
           display: flex;
           align-items: center;
           gap: 2rem;
-          height: 100%;
+          height: 60px;
         }
 
-        /* Logo */
+        /* ── Logo ── */
         .hdr-logo {
           display: flex;
           align-items: center;
@@ -113,17 +150,12 @@ export default function Header() {
           text-decoration: none;
           flex-shrink: 0;
         }
-        .hdr-logo-mark svg {
-          width: 32px;
-          height: 32px;
-        }
         .hdr-logo-text {
           display: flex;
           flex-direction: column;
           line-height: 1;
         }
         .hdr-logo-brand {
-          font-family: var(--font-display);
           font-size: 0.95rem;
           font-weight: 700;
           color: #fff;
@@ -137,11 +169,9 @@ export default function Header() {
           text-transform: uppercase;
         }
 
-        /* Nav */
-        .hdr-nav {
-          flex: 1;
-        }
-        .hdr-nav ul {
+        /* ── Desktop Nav ── */
+        .hdr-nav-desktop { flex: 1; }
+        .hdr-nav-desktop ul {
           list-style: none;
           display: flex;
           gap: 0.15rem;
@@ -168,13 +198,29 @@ export default function Header() {
           background: rgba(255,153,0,0.1) !important;
         }
 
-        /* Actions */
+        /* ── Actions ── */
         .hdr-actions {
           display: flex;
           align-items: center;
           gap: 0.75rem;
           flex-shrink: 0;
+          margin-left: auto;
         }
+        .lang-switch { display: flex; gap: 0.4rem; }
+        .lang-btn {
+          padding: 0.3rem 0.65rem;
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: 6px;
+          font-size: 0.78rem;
+          font-weight: 600;
+          color: rgba(255,255,255,0.65);
+          transition: var(--transition);
+          font-family: var(--font);
+          cursor: pointer;
+          background: none;
+        }
+        .lang-btn:hover { border-color: rgba(255,255,255,0.5); color: #fff; }
+        .lang-btn.active { background: var(--primary); border-color: var(--primary); color: #000; }
 
         .hdr-logout {
           width: 34px;
@@ -196,16 +242,86 @@ export default function Header() {
         }
         .hdr-logout svg { width: 15px; height: 15px; }
 
-        @media (max-width: 768px) {
-          .hdr-inner { gap: 0.75rem; padding: 0 0.5rem; }
-          .hdr-logo-text { display: none; }
-          .hdr-nav { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-          .hdr-nav::-webkit-scrollbar { display: none; }
-          .hdr-nav ul { gap: 0.2rem; }
-          .hdr-nav-link { padding: 0.35rem 0.5rem; font-size: 0.8rem; white-space: nowrap; }
-          .hdr-actions { gap: 0.4rem; }
-          .lang-btn { padding: 0.25rem 0.4rem; font-size: 0.75rem; }
+        /* ── Hamburger ── */
+        .hdr-burger {
+          display: none;
+          flex-direction: column;
+          justify-content: center;
+          gap: 5px;
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: transparent;
+          cursor: pointer;
+          padding: 0 8px;
+          flex-shrink: 0;
+        }
+        .hdr-burger-bar {
+          display: block;
+          width: 100%;
+          height: 2px;
+          background: rgba(255,255,255,0.7);
+          border-radius: 2px;
+          transition: all 0.22s ease;
+          transform-origin: center;
+        }
+        .open-1 { transform: translateY(7px) rotate(45deg); }
+        .open-2 { opacity: 0; transform: scaleX(0); }
+        .open-3 { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ── Mobile drawer ── */
+        .hdr-mobile-nav {
+          background: var(--secondary);
+          border-top: 1px solid rgba(255,255,255,0.07);
+          padding: 0.5rem 0.75rem 0.85rem;
+          animation: slideDown 0.2s ease;
+        }
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .hdr-mobile-nav ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+        }
+        .hdr-mobile-link {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.8rem 1rem;
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: rgba(255,255,255,0.65);
+          border-radius: 8px;
+          text-decoration: none;
+          transition: all 0.15s ease;
+        }
+        .hdr-mobile-link:hover {
+          color: #fff;
+          background: rgba(255,255,255,0.07);
+        }
+        .hdr-mobile-link--active {
+          color: var(--primary) !important;
+          background: rgba(255,153,0,0.1) !important;
+        }
+        .hdr-mobile-icon { font-size: 0.85rem; opacity: 0.7; }
+
+        /* ── Mobile breakpoint ── */
+        @media (max-width: 640px) {
+          .hdr-inner { gap: 0.5rem; height: 56px; }
+          .hdr-nav-desktop { display: none; }
+          .hdr-burger { display: flex; }
+          .lang-btn { padding: 0.25rem 0.45rem; font-size: 0.72rem; }
           .hdr-logout { width: 30px; height: 30px; }
+          .hdr-logo-text { display: none; }
+        }
+        @media (min-width: 641px) {
+          .hdr-mobile-nav { display: none !important; }
         }
       `}</style>
     </header>

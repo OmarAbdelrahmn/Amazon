@@ -371,6 +371,18 @@ export default function OrdersPage() {
             max-height: 60vh;
           }
         }
+        @media (max-width: 640px) {
+          .op-root {
+            flex-direction: column !important;
+            overflow: visible;
+            gap: 1rem;
+            padding-bottom: 1rem;
+          }
+          .op-main-header { padding-bottom: 0.9rem; margin-bottom: 0.9rem; }
+          .op-main-title { font-size: 1.15rem; }
+          .op-grid-scroll { overflow-y: visible; max-height: none; }
+          .op-side { width: 100%; max-height: none; }
+        }
 
         /* side header */
         .op-side-header {
@@ -607,7 +619,7 @@ export default function OrdersPage() {
         /* ── toast ───────────────────────────────────────── */
         .op-toast {
           position: fixed;
-          bottom: 2rem;
+          bottom: max(2rem, env(safe-area-inset-bottom, 2rem));
           left: 50%;
           transform: translateX(-50%);
           padding: 0.75rem 1.5rem;
@@ -634,6 +646,9 @@ export default function OrdersPage() {
         @keyframes toastIn {
           from { opacity: 0; transform: translateX(-50%) translateY(12px); }
           to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @media (max-width: 480px) {
+          .op-toast { white-space: normal; font-size: 0.82rem; padding: 0.65rem 1.1rem; }
         }
       `}</style>
     </div>

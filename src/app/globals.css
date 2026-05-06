@@ -137,17 +137,30 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 .grid-auto {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.25rem;
 }
+@media (max-width: 480px) {
+  .container { padding: 0 0.85rem; }
+  .grid-auto { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+}
 
 /* ── Typography ───────────────────────────────────────────────── */
 h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
 h2 { font-size: 1.4rem;  font-weight: 700; letter-spacing: -0.02em; }
 h3 { font-size: 1.1rem;  font-weight: 700; letter-spacing: -0.01em; }
+@media (max-width: 480px) {
+  h1 { font-size: 1.35rem; }
+  h2 { font-size: 1.15rem; }
+  h3 { font-size: 1rem; }
+  .glass-card { padding: 1.1rem; }
+  .btn-primary { padding: 0.6rem 1rem; font-size: 0.82rem; }
+}
 
 /* ── Alerts ───────────────────────────────────────────────────── */
 .error-alert {
@@ -305,6 +318,8 @@ nav a.active { color: var(--primary); background: rgba(255,153,0,0.12); }
   justify-content: space-between;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 .table-overflow { overflow-x: auto; }
 

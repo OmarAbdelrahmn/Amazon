@@ -1,5 +1,5 @@
 {
-  "welcome": "Welcome",
+  "welcome": "Dashboard",
   "employees": "Employees",
   "orders": "Orders",
   "reports": "Reports",
@@ -51,5 +51,19 @@
   "new_order": "New Order",
   "confirm_order": "Confirm Order",
   "refresh": "Refresh",
-  "optional_note": "Optional note for this order"
+  "optional_note": "Optional note for this order",
+  "login_headline_1": "Smart",
+  "login_headline_2": "Logistics",
+  "login_headline_3": "Solution.",
+  "login_desc": "Real-time order tracking, rider management, and performance analytics in one place.",
+  "login_uptime": "Uptime",
+  "login_live": "Live",
+  "login_sync": "Real-time sync",
+  "login_bilingual": "Bilingual",
+  "login_welcome": "Welcome back",
+  "login_subtitle": "Sign in to your operations account",
+  "username": "Username",
+  "password": "Password",
+  "sign_in": "Sign In",
+  "login_error_invalid": "Invalid username or password"
 }
