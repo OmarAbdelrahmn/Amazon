@@ -26,10 +26,10 @@ export default function Header() {
   };
 
   const navLinks = [
-    { href: '/',           label: t('welcome'),   icon: '▲' },
-    { href: '/employees',  label: t('employees'), icon: '◈' },
-    { href: '/orders',     label: t('orders'),    icon: '◎' },
-    { href: '/reports',    label: t('reports'),   icon: '▣' },
+    { href: '/', label: t('welcome'), icon: '▲' },
+    { href: '/employees', label: t('employees'), icon: '◈' },
+    { href: '/orders', label: t('orders'), icon: '◎' },
+    { href: '/reports', label: t('reports'), icon: '▣' },
   ];
 
   const handleLogout = () => {
@@ -60,7 +60,7 @@ export default function Header() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`hdr-nav-link ${pathname === link.href ? 'hdr-nav-link--active' : ''}`}
+                  className={`hdr-nav-link ${pathname === link.href ? 'active' : ''}`}
                 >
                   {link.label}
                 </Link>
@@ -112,7 +112,7 @@ export default function Header() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`hdr-mobile-link ${pathname === link.href ? 'hdr-mobile-link--active' : ''}`}
+                  className={`hdr-mobile-link ${pathname === link.href ? 'active' : ''}`}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className="hdr-mobile-icon">{link.icon}</span>
@@ -193,9 +193,13 @@ export default function Header() {
           color: rgba(255,255,255,0.9);
           background: rgba(255,255,255,0.07);
         }
-        .hdr-nav-link--active {
-          color: var(--primary) !important;
-          background: rgba(255,153,0,0.1) !important;
+        .hdr-nav-link.active {
+          color: #000 !important;
+          background: var(--primary) !important;
+          font-weight: 700 !important;
+        }
+        .hdr-nav-link.active:hover {
+          background: var(--primary-hover) !important;
         }
 
         /* ── Actions ── */
@@ -305,10 +309,15 @@ export default function Header() {
           color: #fff;
           background: rgba(255,255,255,0.07);
         }
-        .hdr-mobile-link--active {
-          color: var(--primary) !important;
-          background: rgba(255,153,0,0.1) !important;
+        .hdr-mobile-link.active {
+          color: #000 !important;
+          background: var(--primary) !important;
+          font-weight: 700 !important;
         }
+        .hdr-mobile-link.active:hover {
+          background: var(--primary-hover) !important;
+        }
+        .hdr-mobile-link.active .hdr-mobile-icon { opacity: 1; }
         .hdr-mobile-icon { font-size: 0.85rem; opacity: 0.7; }
 
         /* ── Mobile breakpoint ── */

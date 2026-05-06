@@ -51,5 +51,16 @@
   "new_order": "طلب جديد",
   "confirm_order": "تأكيد الطلب",
   "refresh": "تحديث",
-  "optional_note": "ملاحظة اختيارية لهذا الطلب"
+  "optional_note": "ملاحظة اختيارية لهذا الطلب",
+  "date": "التاريخ",
+  "total_orders": "إجمالي الطلبات",
+  "active_employees": "الموظفين النشطين",
+  "total_minutes": "إجمالي الدقائق",
+  "days_active": "أيام النشاط",
+  "order_id": "رقم الطلب",
+  "breakdown": "تفصيل",
+  "loading": "جاري التحميل",
+  "no_employees_found": "لم يتم العثور على موظفين نشطين",
+  "enable": "نشط",
+  "disable": "غير نشط"
 }

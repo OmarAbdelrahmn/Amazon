@@ -16,6 +16,7 @@ export default function EmployeeDetailsPage() {
   const [error, setError] = useState('');
 
   const isArabic = i18n.language === 'ar';
+  const dir = isArabic ? 'rtl' : 'ltr';
 
   useEffect(() => {
     if (!iqamaNo) return;
@@ -35,7 +36,7 @@ export default function EmployeeDetailsPage() {
   }, [iqamaNo]);
 
   return (
-    <div className="employee-details-wrapper">
+    <div className="employee-details-wrapper" dir={dir}>
       <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button className="btn-secondary" onClick={() => router.back()} style={{ borderRadius: '50%', width: '38px', height: '38px', padding: 0, flexShrink: 0 }}>
@@ -48,7 +49,7 @@ export default function EmployeeDetailsPage() {
       {error && <div className="error-alert">{error}</div>}
 
       {loading ? (
-        <div className="loading-state">{t('status')}...</div>
+        <div className="loading-state">{t('loading')}...</div>
       ) : data ? (
         <>
           <div className="profile-header glass-card">
@@ -58,7 +59,7 @@ export default function EmployeeDetailsPage() {
                 <span className="badge tag">{data.jobTitle}</span>
                 <span className="badge tag">{data.country}</span>
                 <span className={`badge ${data.currentStatus === 'enable' ? 'success' : 'idle'}`}>
-                  {data.currentStatus}
+                  {t(data.currentStatus)}
                 </span>
               </div>
               <p className="text-secondary mt-1">{t('iqama_no')}: {data.iqamaNo} • {t('housing')}: {data.housingName}</p>
@@ -85,7 +86,7 @@ export default function EmployeeDetailsPage() {
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>{t('orders')} ID</th>
+                      <th>{t('order_id')}</th>
                       <th>{t('started_at')}</th>
                       <th>{t('ended_at')}</th>
                       <th>{t('duration_mins')}</th>

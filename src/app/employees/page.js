@@ -40,9 +40,9 @@ export default function EmployeesPage() {
 
       <div className="glass-card table-container">
         {loading ? (
-          <div className="loading-state">Loading...</div>
+          <div className="loading-state">{t('loading')}...</div>
         ) : employees.length === 0 ? (
-          <div className="empty-state">No active employees found.</div>
+          <div className="empty-state">{t('no_employees_found')}</div>
         ) : (
           <>
             {/* ── Desktop table ── */}

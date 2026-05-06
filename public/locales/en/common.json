@@ -65,5 +65,16 @@
   "username": "Username",
   "password": "Password",
   "sign_in": "Sign In",
-  "login_error_invalid": "Invalid username or password"
+  "login_error_invalid": "Invalid username or password",
+  "date": "Date",
+  "total_orders": "Total Orders",
+  "active_employees": "Active Employees",
+  "total_minutes": "Total Minutes",
+  "days_active": "Days Active",
+  "order_id": "Order ID",
+  "breakdown": "Breakdown",
+  "loading": "Loading",
+  "no_employees_found": "No active employees found",
+  "enable": "Enabled",
+  "disable": "Disabled"
 }

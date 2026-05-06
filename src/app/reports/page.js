@@ -17,6 +17,7 @@ export default function ReportsPage() {
   const [error, setError] = useState('');
 
   const isArabic = i18n.language === 'ar';
+  const dir = isArabic ? 'rtl' : 'ltr';
 
   const fetchReport = async (e) => {
     if (e) e.preventDefault();
@@ -39,7 +40,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="reports-wrapper">
+    <div className="reports-wrapper" dir={dir}>
       <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
         <h1>{t('reports')}</h1>
       </div>
@@ -102,16 +103,16 @@ export default function ReportsPage() {
           <div className="report-tables">
             <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
               <div className="table-header">
-                <h3>{t('daily_report')} Breakdown</h3>
+                <h3>{t('daily_report')} {t('breakdown')}</h3>
               </div>
               <div className="table-container">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Total Orders</th>
-                      <th>Active Employees</th>
-                      <th>Total Minutes</th>
+                      <th>{t('date')}</th>
+                      <th>{t('total_orders')}</th>
+                      <th>{t('active_employees')}</th>
+                      <th>{t('total_minutes')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -130,7 +131,7 @@ export default function ReportsPage() {
 
             <div className="glass-card" style={{ padding: 0, overflow: 'hidden', marginTop: '1.5rem' }}>
               <div className="table-header">
-                <h3>{t('top_employees')} Breakdown</h3>
+                <h3>{t('top_employees')} {t('breakdown')}</h3>
               </div>
               <div className="table-container">
                 <table className="data-table">
@@ -139,8 +140,8 @@ export default function ReportsPage() {
                       <th>{t('iqama_no')}</th>
                       <th>{t('employees')}</th>
                       <th>{t('orders')}</th>
-                      <th>Days Active</th>
-                      <th>Total Minutes</th>
+                      <th>{t('days_active')}</th>
+                      <th>{t('total_minutes')}</th>
                     </tr>
                   </thead>
                   <tbody>
