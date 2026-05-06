@@ -43,15 +43,11 @@ export default function Header() {
     <header>
       <div className="hdr-inner container">
         {/* Logo */}
-        <Link href="/" className="hdr-logo">
-          <div className="hdr-logo-mark">
-            <img src="/5.png" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
-          </div>
+            <img src="/5.png" alt="Logo" style={{ width: '30px', height: '30px', borderRadius: '12px', objectFit: 'cover' }} />
           <div className="hdr-logo-text">
             <span className="hdr-logo-brand">Express</span>
             <span className="hdr-logo-sub">Service</span>
           </div>
-        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hdr-nav-desktop">
