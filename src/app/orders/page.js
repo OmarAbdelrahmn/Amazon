@@ -88,10 +88,8 @@ export default function OrdersPage() {
     setCloseLoading(true);
     try {
       await apiService.closeAllOrders();
-      setTimeout(() => {
-        fetchActiveOrders();
-        fetchRiders();
-      }, 2000);
+      await fetchActiveOrders();
+      await fetchRiders();
       showToast(isArabic ? 'تم إغلاق جميع الطلبات' : 'All orders closed');
     } catch (err) {
       showToast(err.title || err.message || 'Failed to close all orders', 'error');
