@@ -17,7 +17,7 @@ export const metadata = {
   icons: {
     icon: '/5.png',
   },
-  manifest: '/manifest.json',
+
   openGraph: {
     title: 'Express Service - Smart Logistics Solution',
     description: 'Express Service is a comprehensive Logistics Management System designed to streamline delivery operations. Manage riders, track shipments, and generate detailed reports efficiently.',

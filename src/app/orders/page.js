@@ -10,15 +10,19 @@ export default function OrdersPage() {
   const isArabic = i18n.language === 'ar';
 
   /* ── active orders state ──────────────────────────────────────── */
-  const [data,          setData]          = useState(null);
+  const [data, setData] = useState(null);
   const [ordersLoading, setOrdersLoading] = useState(true);
-  const [ordersError,   setOrdersError]   = useState('');
-  const [closeLoading,  setCloseLoading]  = useState(false);
+  const [ordersError, setOrdersError] = useState('');
+  const [closeLoading, setCloseLoading] = useState(false);
+
+  /* ── riders data state ────────────────────────────────────────── */
+  const [riders, setRiders] = useState(null);
+  const [ridersLoading, setRidersLoading] = useState(false);
 
   /* ── rider submit state ───────────────────────────────────────── */
   const [submittingId, setSubmittingId] = useState(null);
-  const [successId,    setSuccessId]    = useState(null);
-  const [submitError,  setSubmitError]  = useState('');
+  const [successId, setSuccessId] = useState(null);
+  const [submitError, setSubmitError] = useState('');
   const successTimer = useRef(null);
 
   /* ── toast notification ───────────────────────────────────────── */
@@ -45,15 +49,32 @@ export default function OrdersPage() {
     }
   }, []);
 
-  useEffect(() => { fetchActiveOrders(); }, [fetchActiveOrders]);
+  const fetchRiders = useCallback(async () => {
+    setRidersLoading(true);
+    try {
+      const ridersData = await apiService.getEmployees();
+      setRiders(ridersData);
+    } catch (err) {
+      console.error('Failed to load riders', err);
+    } finally {
+      setRidersLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActiveOrders();
+    fetchRiders();
+  }, [fetchActiveOrders, fetchRiders]);
 
   /* ── close single order ───────────────────────────────────────── */
   const handleCloseOrder = async (iqamaNo) => {
-    if (!window.confirm(isArabic ? 'هل أنت متأكد من إغلاق هذا الطلب؟' : 'Close this order?')) return;
     setCloseLoading(true);
     try {
       await apiService.closeOrder(iqamaNo);
-      await fetchActiveOrders();
+      setTimeout(() => {
+        fetchActiveOrders();
+        fetchRiders();
+      }, 2000);
       showToast(isArabic ? 'تم إغلاق الطلب بنجاح' : 'Order closed successfully');
     } catch (err) {
       showToast(err.title || err.message || 'Failed to close order', 'error');
@@ -64,15 +85,13 @@ export default function OrdersPage() {
 
   /* ── close all orders ─────────────────────────────────────────── */
   const handleCloseAll = async () => {
-    if (!window.confirm(
-      isArabic
-        ? 'هل أنت متأكد من إغلاق جميع الطلبات النشطة؟ لا يمكن التراجع عن هذا الإجراء.'
-        : 'Close ALL active orders? This cannot be undone.'
-    )) return;
     setCloseLoading(true);
     try {
       await apiService.closeAllOrders();
-      await fetchActiveOrders();
+      setTimeout(() => {
+        fetchActiveOrders();
+        fetchRiders();
+      }, 2000);
       showToast(isArabic ? 'تم إغلاق جميع الطلبات' : 'All orders closed');
     } catch (err) {
       showToast(err.title || err.message || 'Failed to close all orders', 'error');
@@ -101,7 +120,10 @@ export default function OrdersPage() {
           ? `✓ تم تعيين طلب لـ ${rider.nameAR}`
           : `✓ Order assigned to ${rider.nameEN}`
       );
-      await fetchActiveOrders();
+      setTimeout(() => {
+        fetchActiveOrders();
+        fetchRiders();
+      }, 2000);
     } catch (err) {
       setSubmitError(err.message || 'Failed to create order');
       showToast(err.message || 'Failed to create order', 'error');
@@ -141,6 +163,8 @@ export default function OrdersPage() {
             onSelect={handleRiderSelect}
             submittingId={submittingId}
             successId={successId}
+            externalRiders={riders}
+            loadingExternal={ridersLoading && !riders}
           />
         </div>
       </section>
@@ -166,10 +190,10 @@ export default function OrdersPage() {
               aria-label={t('refresh')}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-                   className={ordersLoading ? 'op-spinning' : ''}>
+                strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+                className={ordersLoading ? 'op-spinning' : ''}>
                 <polyline points="23 4 23 10 17 10" />
-                <polyline points="1 20 1 14 7 14"  />
+                <polyline points="1 20 1 14 7 14" />
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
               </svg>
             </button>
@@ -224,9 +248,9 @@ export default function OrdersPage() {
                     aria-label={isArabic ? 'إغلاق الطلب' : 'Close order'}
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6"  x2="6"  y2="18" />
-                      <line x1="6"  y1="6"  x2="18" y2="18" />
+                      strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                   </button>
                 </div>
@@ -235,7 +259,7 @@ export default function OrdersPage() {
           ) : (
             <div className="op-side-empty">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M8 12h8M12 8v8" />
               </svg>
@@ -257,7 +281,7 @@ export default function OrdersPage() {
               ) : (
                 <>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6l-1 14H6L5 6" />
                     <path d="M10 11v6M14 11v6" />

@@ -47,7 +47,9 @@ export default function RiderSelector({
     })();
   }, [externalRiders]);
 
-  const displayRiders = externalRiders ?? riders;
+  const displayRiders = [...(externalRiders ?? riders)].sort((a, b) =>
+    (b.totalOrdersToday || 0) - (a.totalOrdersToday || 0)
+  );
   const isLoading = externalRiders !== null ? loadingExternal : loading;
 
   /* ── helpers ──────────────────────────────────────────────────── */
@@ -138,12 +140,28 @@ export default function RiderSelector({
                         )}
                       </div>
                     )}
+
+                    {/* total orders badge */}
+                    {rider.totalOrdersToday !== undefined && (
+                      <div className="rs-orders-badge" title={isRtl ? 'طلبات اليوم' : 'Orders Today'}>
+                        {rider.totalOrdersToday}
+                      </div>
+                    )}
                   </div>
 
                   {/* names */}
                   <div className="rs-names">
-                    <span className="rs-name-ar">{rider.nameAR}</span>
-                    <span className="rs-name-en">{rider.nameEN}</span>
+                    {isRtl ? (
+                      <>
+                        <span className="rs-name-ar">{rider.nameAR}</span>
+                        <span className="rs-name-en">{rider.nameEN}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="rs-name-en">{rider.nameEN}</span>
+                        <span className="rs-name-ar">{rider.nameAR}</span>
+                      </>
+                    )}
                   </div>
                 </button>
 
@@ -151,7 +169,7 @@ export default function RiderSelector({
                 <div className="rs-note-wrap">
                   <textarea
                     className="rs-note"
-                    rows={2}
+                    rows={1}
                     value={notes[rider.iqamaNo] || ''}
                     onChange={e => handleNote(rider.iqamaNo, e.target.value)}
                     disabled={isSubmitting || isDisabled}
@@ -178,6 +196,7 @@ export default function RiderSelector({
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
           gap: 1rem;
+          padding-top: 0.5rem; /* Room for hover transform translateY */
         }
         @media (max-width: 640px) {
           .rs-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
@@ -242,32 +261,32 @@ export default function RiderSelector({
         /* ── image wrap ──────────────────────────────────── */
         .rs-img-wrap {
           position: relative;
-          width: 72px;
-          height: 72px;
+          width: 105px;
+          height: 105px;
           flex-shrink: 0;
         }
         .rs-avatar {
-          width: 72px;
-          height: 72px;
+          width: 105px;
+          height: 105px;
           border-radius: 50%;
           object-fit: cover;
           display: block;
-          border: 3px solid var(--border);
+          border: 4px solid var(--border);
         }
 
         /* ── initials fallback ───────────────────────────── */
         .rs-initials {
-          width: 72px;
-          height: 72px;
+          width: 105px;
+          height: 105px;
           border-radius: 50%;
           background: linear-gradient(135deg, var(--secondary), var(--accent));
           color: #fff;
-          font-size: 1.5rem;
+          font-size: 2.1rem;
           font-weight: 700;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 3px solid var(--border);
+          border: 4px solid var(--border);
         }
 
         /* ── overlay (spinner / tick) ────────────────────── */
@@ -285,7 +304,7 @@ export default function RiderSelector({
           background: rgba(0,138,0,0.75);
           animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
         }
-        .rs-overlay svg { width: 28px; height: 28px; }
+        .rs-overlay svg { width: 34px; height: 34px; }
         @keyframes popIn {
           from { transform: scale(0); opacity: 0; }
           to   { transform: scale(1); opacity: 1; }
@@ -293,14 +312,36 @@ export default function RiderSelector({
 
         /* ── spinner ─────────────────────────────────────── */
         .rs-spinner {
-          width: 26px;
-          height: 26px;
-          border: 3px solid rgba(255,255,255,0.35);
+          width: 30px;
+          height: 30px;
+          border: 4px solid rgba(255,255,255,0.35);
           border-top-color: #fff;
           border-radius: 50%;
           animation: spin 0.65s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* ── orders badge ───────────────────────────────── */
+        .rs-orders-badge {
+          position: absolute;
+          top: -3px;
+          right: -3px;
+          background: var(--primary);
+          color: #fff;
+          font-size: 0.76rem;
+          font-weight: 800;
+          min-width: 24px;
+          height: 24px;
+          padding: 0 4px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2.5px solid var(--surface);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+          z-index: 5;
+        }
+        [dir='rtl'] .rs-orders-badge { right: auto; left: -3px; }
 
         /* ── names ───────────────────────────────────────── */
         .rs-names {

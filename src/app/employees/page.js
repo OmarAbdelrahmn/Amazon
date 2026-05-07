@@ -133,7 +133,7 @@ export default function EmployeesPage() {
           letter-spacing: 0.04em;
         }
         .data-table tbody tr:last-child td { border-bottom: none; }
-        .data-table tbody tr:hover { background: var(--primary-muted); }
+        .data-table tbody tr:hover { background: var(--primary-light); cursor: pointer; }
         .font-medium { font-weight: 500; }
 
         .status-badge {
