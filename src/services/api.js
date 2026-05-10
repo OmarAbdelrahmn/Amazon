@@ -7,13 +7,20 @@ const fetchAPI = async (endpoint, options = {}) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
   const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
 
+  const headers = {
+    'Content-Type': 'application/json',
+    ...authHeader,
+    ...options.headers,
+  };
+
+  // If body is FormData, browser needs to set Content-Type with boundary
+  if (options.body instanceof FormData) {
+    delete headers['Content-Type'];
+  }
+
   const response = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeader,
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -87,4 +94,58 @@ export const apiService = {
   getDailyReport: (date) => fetchAPI(`/api/order/report/daily?date=${date}`),
   getRangeReport: (start, end) => fetchAPI(`/api/order/report/range?start=${start}&end=${end}`),
   getStatistics: () => fetchAPI('/api/order/report/statistics'),
+
+  // Dispatch
+  getDispatchNow: () => fetchAPI('/api/order/dispatch/now'),
+  getDispatch: (date, time) => {
+    const params = new URLSearchParams();
+    if (date) params.append('date', date);
+    if (time) params.append('time', time);
+    const qs = params.toString();
+    return fetchAPI(`/api/order/dispatch${qs ? `?${qs}` : ''}`);
+  },
+  getDispatchAll: (date) => fetchAPI(`/api/order/dispatch/all${date ? `?date=${date}` : ''}`),
+
+  // Transporter Shifts
+  importTransporterShifts: (formData) => fetchAPI('/api/transporter-shifts/upload', {
+    method: 'POST',
+    body: formData,
+  }),
+  getTransporterShiftsByDay: (date) => fetchAPI(`/api/transporter-shifts/day?date=${date}`),
+  getTransporterShiftsToday: () => fetchAPI('/api/transporter-shifts/day/today'),
+  getTransporterShiftsActive: (date, time) => {
+    const params = new URLSearchParams();
+    if (date) params.append('date', date);
+    if (time) params.append('time', time);
+    const qs = params.toString();
+    return fetchAPI(`/api/transporter-shifts/active${qs ? `?${qs}` : ''}`);
+  },
+  getRiderMonthlyShifts: (riderId, year, month) => {
+    const params = new URLSearchParams();
+    if (year) params.append('year', year);
+    if (month) params.append('month', month);
+    const qs = params.toString();
+    return fetchAPI(`/api/transporter-shifts/riders/${riderId}/monthly${qs ? `?${qs}` : ''}`);
+  },
+  getAllRidersMonthlyShifts: (year, month) => {
+    const params = new URLSearchParams();
+    if (year) params.append('year', year);
+    if (month) params.append('month', month);
+    const qs = params.toString();
+    return fetchAPI(`/api/transporter-shifts/monthly${qs ? `?${qs}` : ''}`);
+  },
+  createOrUpdateShift: (data) => fetchAPI('/api/transporter-shifts/shifts', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  patchShiftTimes: (shiftId, data) => fetchAPI(`/api/transporter-shifts/shifts/${shiftId}/times`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }),
+  deleteShift: (shiftId) => fetchAPI(`/api/transporter-shifts/shifts/${shiftId}`, {
+    method: 'DELETE',
+  }),
+  markRiderBreakDay: (riderId, date) => fetchAPI(`/api/transporter-shifts/riders/${riderId}/break?date=${date}`, {
+    method: 'POST',
+  }),
 };

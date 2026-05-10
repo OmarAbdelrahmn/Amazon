@@ -30,6 +30,7 @@ export default function Header() {
     { href: '/employees', label: t('employees'), icon: '◈' },
     { href: '/orders', label: t('orders'), icon: '◎' },
     { href: '/reports', label: t('reports'), icon: '▣' },
+    { href: '/shifts', label: t('shifts') || 'Shifts', icon: '⧖' },
   ];
 
   const handleLogout = () => {

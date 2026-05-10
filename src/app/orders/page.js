@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { apiService } from '@/services/api';
 import RiderSelector from '@/components/RiderSelector';
 
@@ -9,15 +9,27 @@ export default function OrdersPage() {
   const { t, i18n } = useTranslation('common');
   const isArabic = i18n.language === 'ar';
 
-  /* ── active orders state ──────────────────────────────────────── */
-  const [data, setData] = useState(null);
-  const [ordersLoading, setOrdersLoading] = useState(true);
-  const [ordersError, setOrdersError] = useState('');
+  /* ── riders & active orders state ──────────────────────────────────────── */
+  const [riders, setRiders] = useState(null);
+  const [ridersLoading, setRidersLoading] = useState(true);
+  const [ridersError, setRidersError] = useState('');
   const [closeLoading, setCloseLoading] = useState(false);
 
-  /* ── riders data state ────────────────────────────────────────── */
-  const [riders, setRiders] = useState(null);
-  const [ridersLoading, setRidersLoading] = useState(false);
+  // Derive active orders from riders
+  const activeOrders = useMemo(() => {
+    if (!riders) return [];
+    return riders.filter(r => r.isCurrentlyOnOrder).map(r => ({
+      iqamaNo: r.iqamaNo,
+      nameAR: r.nameAR,
+      nameEN: r.nameEN,
+      jobTitle: r.jobTitle,
+      housingName: r.housingName,
+      minutesElapsed: r.currentOrderStartedAt 
+        ? (new Date() - new Date(r.currentOrderStartedAt)) / 60000 
+        : 0,
+    }));
+  }, [riders]);
+  const totalActiveOrders = activeOrders.length;
 
   /* ── rider submit state ───────────────────────────────────────── */
   const [submittingId, setSubmittingId] = useState(null);
@@ -35,36 +47,23 @@ export default function OrdersPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3200);
   };
 
-  /* ── fetch active orders ──────────────────────────────────────── */
-  const fetchActiveOrders = useCallback(async () => {
-    setOrdersLoading(true);
-    setOrdersError('');
-    try {
-      const snapshot = await apiService.getActiveOrders();
-      setData(snapshot);
-    } catch (err) {
-      setOrdersError(err.title || err.message || 'Failed to load active orders.');
-    } finally {
-      setOrdersLoading(false);
-    }
-  }, []);
-
+  /* ── fetch riders ────────────────────────────────────────────── */
   const fetchRiders = useCallback(async () => {
     setRidersLoading(true);
+    setRidersError('');
     try {
       const ridersData = await apiService.getEmployees();
       setRiders(ridersData);
     } catch (err) {
-      console.error('Failed to load riders', err);
+      setRidersError(err.title || err.message || 'Failed to load data.');
     } finally {
       setRidersLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchActiveOrders();
     fetchRiders();
-  }, [fetchActiveOrders, fetchRiders]);
+  }, [fetchRiders]);
 
   /* ── close single order ───────────────────────────────────────── */
   const handleCloseOrder = async (iqamaNo) => {
@@ -72,7 +71,6 @@ export default function OrdersPage() {
     try {
       await apiService.closeOrder(iqamaNo);
       setTimeout(() => {
-        fetchActiveOrders();
         fetchRiders();
       }, 2000);
       showToast(isArabic ? 'تم إغلاق الطلب بنجاح' : 'Order closed successfully');
@@ -88,7 +86,6 @@ export default function OrdersPage() {
     setCloseLoading(true);
     try {
       await apiService.closeAllOrders();
-      await fetchActiveOrders();
       await fetchRiders();
       showToast(isArabic ? 'تم إغلاق جميع الطلبات' : 'All orders closed');
     } catch (err) {
@@ -119,7 +116,6 @@ export default function OrdersPage() {
           : `✓ Order assigned to ${rider.nameEN}`
       );
       setTimeout(() => {
-        fetchActiveOrders();
         fetchRiders();
       }, 2000);
     } catch (err) {
@@ -177,19 +173,19 @@ export default function OrdersPage() {
             <h2 className="op-side-title">
               {t('on_order')}
               <span className="op-badge op-badge--active">
-                {data?.totalActiveOrders ?? 0}
+                {totalActiveOrders}
               </span>
             </h2>
             <button
               className="op-refresh-btn"
-              onClick={fetchActiveOrders}
-              disabled={ordersLoading || closeLoading}
+              onClick={fetchRiders}
+              disabled={ridersLoading || closeLoading}
               title={t('refresh')}
               aria-label={t('refresh')}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-                className={ordersLoading ? 'op-spinning' : ''}>
+                className={ridersLoading ? 'op-spinning' : ''}>
                 <polyline points="23 4 23 10 17 10" />
                 <polyline points="1 20 1 14 7 14" />
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
@@ -197,27 +193,19 @@ export default function OrdersPage() {
             </button>
           </div>
 
-          {data?.snapshotAt && (
-            <p className="op-snapshot-time">
-              {new Date(data.snapshotAt).toLocaleTimeString(i18n.language, {
-                hour: '2-digit', minute: '2-digit'
-              })}
-            </p>
-          )}
-
-          {ordersError && <div className="op-side-error">{ordersError}</div>}
+          {ridersError && <div className="op-side-error">{ridersError}</div>}
         </div>
 
         {/* orders list */}
         <div className="op-side-body">
-          {ordersLoading ? (
+          {ridersLoading && !riders ? (
             <div className="op-side-loading">
               {[1, 2, 3].map(i => <div key={i} className="op-order-skeleton" />)}
             </div>
-          ) : data?.activeOrders?.length > 0 ? (
+          ) : activeOrders.length > 0 ? (
             <div className="op-order-list">
-              {data.activeOrders.map(order => (
-                <div key={order.orderId} className="op-order-card">
+              {activeOrders.map(order => (
+                <div key={order.iqamaNo} className="op-order-card">
                   <div className="op-order-info">
                     <p className="op-order-name">
                       {isArabic ? order.nameAR : order.nameEN}
@@ -232,11 +220,6 @@ export default function OrdersPage() {
                           ? order.minutesElapsed.toFixed(1)
                           : '0'} {t('duration_mins')}
                       </span>
-                      {order.notes && (
-                        <span className="op-tag op-tag--note" title={order.notes}>
-                          {isArabic ? 'ملاحظة' : 'Note'}
-                        </span>
-                      )}
                     </div>
                   </div>
                   <button
@@ -267,7 +250,7 @@ export default function OrdersPage() {
         </div>
 
         {/* close-all footer */}
-        {data?.activeOrders?.length > 0 && (
+        {activeOrders.length > 0 && (
           <div className="op-side-footer">
             <button
               className="op-close-all-btn"
