@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { apiService } from '@/services/api';
+import { Users, Calendar, Clock, AlertCircle, FileSpreadsheet, Upload } from 'lucide-react';
 
 export default function ShiftsPage() {
   const { t, i18n } = useTranslation('common');
@@ -130,7 +131,7 @@ export default function ShiftsPage() {
             value={currentDate}
             onChange={(e) => setCurrentDate(e.target.value)}
           />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="import-section">
             <input
               type="file"
               id="excel-upload"
@@ -139,18 +140,23 @@ export default function ShiftsPage() {
               onChange={handleFileChange}
             />
             <button
-              className="btn-outline-small"
+              className={`btn-excel-select ${selectedFile ? 'has-file' : ''}`}
               onClick={() => document.getElementById('excel-upload').click()}
-              style={{ padding: '0.6rem 2rem', height: '100%' }}
             >
-              {selectedFile ? selectedFile.name : (isArabic ? 'اختر ملف إكسيل' : 'Choose Excel File')}
+              <FileSpreadsheet size={18} />
+              <span>{selectedFile ? selectedFile.name : (isArabic ? 'اختر ملف إكسيل' : 'Choose Excel File')}</span>
             </button>
             <button
-              className="btn-primary"
+              className="btn-import-trigger"
               onClick={handleImport}
               disabled={!selectedFile || importLoading}
             >
-              {importLoading ? (isArabic ? 'جاري الاستيراد...' : 'Importing...') : (isArabic ? 'استيراد' : 'Import')}
+              {importLoading ? (
+                <div className="spin-inline"></div>
+              ) : (
+                <Upload size={18} />
+              )}
+              {importLoading ? (isArabic ? 'جاري...' : 'Importing...') : (isArabic ? 'استيراد' : 'Import')}
             </button>
           </div>
         </div>
@@ -168,23 +174,27 @@ export default function ShiftsPage() {
         <div className="loading-state">{t('loading') || (isArabic ? 'جاري التحميل...' : 'Loading...')}</div>
       ) : data ? (
         <div className="shifts-content animate-fade-in">
-          <div className="summary-cards grid-auto mb-4">
-            <div className="glass-card summary-box">
-              <div className="stat-label">{isArabic ? 'إجمالي السائقين' : 'Total Riders'}</div>
-              <div className="stat-val">{data.totalRiders}</div>
-            </div>
-            <div className="glass-card summary-box">
-              <div className="stat-label">{isArabic ? 'لديهم ورديات' : 'With Shifts'}</div>
-              <div className="stat-val text-primary">{data.ridersWithShifts}</div>
-            </div>
-            <div className="glass-card summary-box">
-              <div className="stat-label">{isArabic ? 'في إجازة' : 'On Break'}</div>
-              <div className="stat-val text-accent">{data.ridersOnBreak}</div>
-            </div>
-            <div className="glass-card summary-box">
-              <div className="stat-label">{isArabic ? 'لا توجد بيانات' : 'No Data'}</div>
-              <div className="stat-val text-error">{data.ridersWithNoData}</div>
-            </div>
+          <div className="stats-grid mb-4">
+            {[
+              { label: isArabic ? 'إجمالي السائقين' : 'Total Riders', value: data.totalRiders, icon: Users, bgClass: 'bg-blue-gradient' },
+              { label: isArabic ? 'لديهم ورديات' : 'With Shifts', value: data.ridersWithShifts, icon: Calendar, bgClass: 'bg-green-gradient' },
+              { label: isArabic ? 'في إجازة' : 'On Break', value: data.ridersOnBreak, icon: Clock, bgClass: 'bg-orange-gradient' },
+              { label: isArabic ? 'لا توجد بيانات' : 'No Data', value: data.ridersWithNoData, icon: AlertCircle, bgClass: 'bg-red-gradient' },
+            ].map((stat, i) => {
+              const Icon = stat.icon;
+              return (
+                <div key={i} className={`stat-card ${stat.bgClass}`}>
+                  <div className="stat-icon-wrapper">
+                    <Icon size={20} color="#fff" />
+                  </div>
+                  <Icon className="stat-ghost-icon" size={70} color="#fff" />
+                  <div className="stat-content">
+                    <h3>{stat.value}</h3>
+                    <p>{stat.label}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="glass-card no-pad">
@@ -242,7 +252,7 @@ export default function ShiftsPage() {
                         </td>
                         <td>
                           {rider.isBreakDay ? <span className="status-badge idle">{isArabic ? 'في إجازة' : 'On Break'}</span> :
-                            rider.hasShift ? <span className="status-badge active">{isArabic ? 'مجدول' : 'Scheduled'}</span> :
+                            rider.hasShift ? <span className="status-badge active">{isArabic ? 'يعمل' : 'Working'}</span> :
                               <span className="status-badge">{t('no_data') || (isArabic ? 'لا توجد بيانات' : 'No Data')}</span>}
                         </td>
                         <td>{renderShiftCell(shift1, 1)}</td>
@@ -318,6 +328,31 @@ export default function ShiftsPage() {
         .shifts-wrapper { padding: 1rem 0; width: 100%; max-width: 1200px; margin: 0 auto; }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
         .header-actions { display: flex; gap: 1rem; align-items: center; }
+        
+        /* ── Stats Grid ── */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.25rem;
+          margin-bottom: 1.5rem;
+        }
+        .stat-card {
+          position: relative;
+          border-radius: var(--radius-lg);
+          padding: 1.25rem;
+          overflow: hidden;
+          box-shadow: var(--shadow);
+          color: #fff;
+        }
+        .bg-blue-gradient { background: linear-gradient(135deg, var(--accent), #1A44B8); }
+        .bg-orange-gradient { background: linear-gradient(135deg, #f59e0b, #f97316); }
+        .bg-green-gradient { background: linear-gradient(135deg, #10b981, #059669); }
+        .bg-red-gradient { background: linear-gradient(135deg, var(--error), #990013); }
+        .stat-icon-wrapper { background: rgba(255, 255, 255, 0.15); width: fit-content; padding: 0.5rem; border-radius: 8px; margin-bottom: 0.75rem; }
+        .stat-ghost-icon { position: absolute; left: -1rem; bottom: -1rem; opacity: 0.2; transform: rotate(12deg); }
+        .stat-content { position: relative; z-index: 10; }
+        .stat-content h3 { font-size: 1.75rem; margin: 0 0 0.25rem; font-weight: 800; line-height: 1.1; }
+        .stat-content p { margin: 0; font-size: 0.875rem; font-weight: 500; opacity: 0.95; }
         .date-picker { max-width: 200px; padding: 0.5rem 1rem; }
         .mb-2 { margin-bottom: 0.5rem; }
         .mb-3 { margin-bottom: 1rem; }
@@ -352,8 +387,87 @@ export default function ShiftsPage() {
         .badge-break { background: rgba(107,112,128,0.15); color: var(--text-secondary); }
         .badge-edited { background: var(--primary-light); color: var(--primary); margin-left: 0.4rem; }
 
-        .btn-outline-small { background: transparent; border: 1px solid var(--border-strong); color: var(--text); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .btn-outline-small:hover { background: var(--surface-2); }
+        .btn-outline-small { background: transparent; border: 1px solid var(--border-strong); color: var(--text); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-outline-small:hover { background: var(--surface-2); border-color: var(--text); }
+
+        /* ── Import Section Styling ── */
+        .import-section {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: rgba(255, 255, 255, 0.5);
+          padding: 0.35rem;
+          border-radius: 14px;
+          border: 1px solid var(--border);
+          box-shadow: var(--shadow-sm);
+        }
+        .btn-excel-select {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          background: var(--surface);
+          border: 1.5px dashed var(--border-strong);
+          color: var(--text-secondary);
+          padding: 0.5rem 1.25rem;
+          border-radius: 10px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.22s;
+          min-height: 42px;
+          white-space: nowrap;
+          max-width: 240px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .btn-excel-select:hover {
+          border-color: var(--accent);
+          color: var(--accent);
+          background: rgba(0, 112, 192, 0.04);
+          transform: translateY(-1px);
+        }
+        .btn-excel-select.has-file {
+          border-style: solid;
+          border-color: var(--success);
+          color: var(--success);
+          background: var(--success-light);
+        }
+        .btn-import-trigger {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: var(--primary);
+          color: #000;
+          padding: 0.5rem 1.5rem;
+          border-radius: 10px;
+          font-weight: 800;
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: all 0.22s;
+          min-height: 42px;
+          border: none;
+          box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
+        }
+        .btn-import-trigger:hover:not(:disabled) {
+          background: var(--primary-hover);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(255, 153, 0, 0.3);
+        }
+        .btn-import-trigger:disabled {
+          background: var(--surface-2);
+          color: var(--text-tertiary);
+          box-shadow: none;
+          cursor: not-allowed;
+        }
+        .spin-inline {
+          width: 16px;
+          height: 16px;
+          border: 2.5px solid rgba(0,0,0,0.1);
+          border-top-color: #000;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(2px); }
         .modal-content { width: 100%; max-width: 400px; box-shadow: var(--shadow-xl); }

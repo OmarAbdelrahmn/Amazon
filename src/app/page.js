@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { apiService } from '@/services/api';
+import { Package, Clock, Users, Activity } from 'lucide-react';
 
 const MONTH_NAMES = {
   en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
@@ -53,30 +54,26 @@ export default function Home() {
     {
       label: t('active_orders'),
       value: stats.currentlyActiveOrders || 0,
-      icon: '🚴',
-      color: 'var(--primary)',
-      bg: 'var(--primary-light)',
+      icon: Activity,
+      bgClass: 'bg-orange-gradient',
     },
     {
       label: t('today_report'),
       value: stats.totalOrdersToday || 0,
-      icon: '📦',
-      color: 'var(--success)',
-      bg: 'var(--success-light)',
+      icon: Package,
+      bgClass: 'bg-green-gradient',
     },
     {
       label: t('employees'),
       value: stats.totalEligibleEmployees || 0,
-      icon: '👥',
-      color: 'var(--accent)',
-      bg: 'rgba(0,112,192,0.1)',
+      icon: Users,
+      bgClass: 'bg-blue-gradient',
     },
     {
       label: t('avg_mins'),
       value: stats.averageMinutesPerOrder ? stats.averageMinutesPerOrder.toFixed(1) : '0',
-      icon: '⏱',
-      color: 'var(--warning)',
-      bg: 'rgba(179,90,0,0.1)',
+      icon: Clock,
+      bgClass: 'bg-red-gradient',
       suffix: isArabic ? 'د' : 'm',
     },
   ] : [];
@@ -124,21 +121,25 @@ export default function Home() {
       ) : (
         <>
           {/* ── Stat cards ── */}
-          <div className="grid-auto" style={{ marginBottom: '1.75rem' }}>
-            {statCards.map(card => (
-              <div key={card.label} className="glass-card stat-card animate-fade-in">
-                <div className="stat-icon-wrap" style={{ background: card.bg }}>
-                  <span className="stat-icon">{card.icon}</span>
-                </div>
-                <div className="stat-body">
-                  <div className="stat-label-text">{card.label}</div>
-                  <div className="stat-number" style={{ color: card.color }}>
-                    {card.value}
-                    {card.suffix && <span className="stat-suffix">{card.suffix}</span>}
+          <div className="stats-grid" style={{ marginBottom: '1.75rem' }}>
+            {statCards.map((card, i) => {
+              const Icon = card.icon;
+              return (
+                <div key={i} className={`stat-card ${card.bgClass} animate-fade-in`}>
+                  <div className="stat-icon-wrapper">
+                    <Icon size={20} color="#fff" />
+                  </div>
+                  <Icon className="stat-ghost-icon" size={70} color="#fff" />
+                  <div className="stat-content">
+                    <h3>
+                      {card.value}
+                      {card.suffix && <span className="stat-suffix">{card.suffix}</span>}
+                    </h3>
+                    <p>{card.label}</p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* ── Charts grid ── */}
@@ -181,17 +182,17 @@ export default function Home() {
                 <ol className="leader-list">
                   {topEmployees.map(([name, count], idx) => (
                     <li key={name} className="leader-item">
-                      <div className="leader-right">
-                        <span className="leader-count">{count}</span>
-                        <span className="leader-unit">{t('orders')}</span>
-                      </div>
-                      <div className="leader-name">{name}</div>
                       <div className="leader-rank">
                         {idx < 3 ? (
                           <span className="medal">{MEDAL[idx]}</span>
                         ) : (
                           <span className="rank-num">{idx + 1}</span>
                         )}
+                      </div>
+                      <div className="leader-name">{name}</div>
+                      <div className="leader-right">
+                        <span className="leader-count">{count}</span>
+                        <span className="leader-unit">{t('orders')}</span>
                       </div>
                     </li>
                   ))}
@@ -233,37 +234,30 @@ export default function Home() {
         .sk-line--short { width: 55%; }
         .sk-line--long  { width: 30%; height: 28px; }
 
-        /* ── Stat card ── */
+        /* ── Stats Grid ── */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.25rem;
+          margin-bottom: 1.5rem;
+        }
         .stat-card {
-          display: flex;
-          align-items: center;
-          gap: 1.1rem;
-        }
-        .stat-icon-wrap {
-          width: 52px; height: 52px;
-          border-radius: 14px;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-        }
-        .stat-icon { font-size: 1.55rem; line-height: 1; }
-        .stat-body { flex: 1; min-width: 0; }
-        .stat-label-text {
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: var(--text-secondary);
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          margin-bottom: 0.3rem;
-          white-space: nowrap;
+          position: relative;
+          border-radius: var(--radius-lg);
+          padding: 1.25rem;
           overflow: hidden;
-          text-overflow: ellipsis;
+          box-shadow: var(--shadow);
+          color: #fff;
         }
-        .stat-number {
-          font-size: 2rem;
-          font-weight: 800;
-          letter-spacing: -0.03em;
-          line-height: 1;
-        }
+        .bg-blue-gradient { background: linear-gradient(135deg, var(--accent), #355bc2ff); }
+        .bg-orange-gradient { background: linear-gradient(135deg, #f59e0b, #f97316); }
+        .bg-green-gradient { background: linear-gradient(135deg, #10b981, #057a55ff); }
+        .bg-red-gradient { background: linear-gradient(135deg, var(--error), #9c767aff); }
+        .stat-icon-wrapper { background: rgba(255, 255, 255, 0.15); width: fit-content; padding: 0.5rem; border-radius: 8px; margin-bottom: 0.75rem; }
+        .stat-ghost-icon { position: absolute; left: -1rem; bottom: -1rem; opacity: 0.2; transform: rotate(12deg); }
+        .stat-content { position: relative; z-index: 10; }
+        .stat-content h3 { font-size: 1.75rem; margin: 0 0 0.25rem; font-weight: 800; line-height: 1.1; }
+        .stat-content p { margin: 0; font-size: 0.875rem; font-weight: 500; opacity: 0.95; }
         .stat-suffix {
           font-size: 0.9rem;
           font-weight: 600;
@@ -343,20 +337,9 @@ export default function Home() {
         .leader-item {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 0.85rem;
-          padding: 0.8rem 0;
+          gap: 1rem;
+          padding: 0.85rem 0;
           border-bottom: 1px solid var(--border);
-        }
-        [dir="rtl"] .leader-item { flex-direction: row-reverse; }
-        .leader-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .leader-item:first-child { padding-top: 0; }
-        .leader-left {
-          display: flex;
-          align-items: center;
-          gap: 0.65rem;
-          min-width: 0;
-          flex: 1;
         }
         .leader-rank {
           width: 32px;
@@ -379,6 +362,7 @@ export default function Home() {
           font-size: 0.9rem;
           font-weight: 600;
           color: var(--text);
+          flex: 1;
           min-width: 0;
           overflow: hidden;
           text-overflow: ellipsis;

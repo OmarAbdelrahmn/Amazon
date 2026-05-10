@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiService } from '@/services/api';
+import { Users, Package, Clock, CheckCircle, Eye } from 'lucide-react';
 
 export default function EmployeesPage() {
   const { t, i18n } = useTranslation('common');
@@ -35,6 +36,31 @@ export default function EmployeesPage() {
       <div style={{ marginBottom: '1.5rem' }}>
         <h1>{t('employees')}</h1>
       </div>
+
+      {!loading && !error && employees.length > 0 && (
+        <div className="stats-grid">
+          {[
+            { label: isArabic ? 'إجمالي الموظفين' : 'Total Employees', value: employees.length, icon: Users, bgClass: 'bg-blue-gradient' },
+            { label: isArabic ? 'متاح' : 'Available', value: employees.filter(emp => !emp.isCurrentlyOnOrder).length, icon: CheckCircle, bgClass: 'bg-green-gradient' },
+            { label: isArabic ? 'في طلب' : 'On Order', value: employees.filter(emp => emp.isCurrentlyOnOrder).length, icon: Clock, bgClass: 'bg-orange-gradient' },
+            { label: isArabic ? 'طلبات اليوم' : 'Orders Today', value: employees.reduce((acc, emp) => acc + (emp.totalOrdersToday || 0), 0), icon: Package, bgClass: 'bg-blue-gradient' },
+          ].map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <div key={i} className={`stat-card ${stat.bgClass}`}>
+                <div className="stat-icon-wrapper">
+                  <Icon size={20} color="#fff" />
+                </div>
+                <Icon className="stat-ghost-icon" size={70} color="#fff" />
+                <div className="stat-content">
+                  <h3>{stat.value}</h3>
+                  <p>{stat.label}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {error && <div className="error-alert" style={{ marginBottom: '1rem' }}>{error}</div>}
 
@@ -72,7 +98,8 @@ export default function EmployeesPage() {
                       <td>{emp.totalOrdersToday}</td>
                       <td className="actions-cell">
                         <Link href={`/employees/${emp.iqamaNo}`} className="btn-view">
-                          {t('view')}
+                          <Eye size={16} />
+                          {t('view') !== 'view' ? t('view') : (isArabic ? 'عرض' : 'Show')}
                         </Link>
                       </td>
                     </tr>
@@ -99,7 +126,8 @@ export default function EmployeesPage() {
                       {t('total_orders_today')}: <strong>{emp.totalOrdersToday}</strong>
                     </span>
                     <Link href={`/employees/${emp.iqamaNo}`} className="btn-view">
-                      {t('view')}
+                      <Eye size={16} />
+                      {t('view') !== 'view' ? t('view') : (isArabic ? 'عرض' : 'Show')}
                     </Link>
                   </div>
                 </div>
@@ -111,7 +139,71 @@ export default function EmployeesPage() {
 
       <style jsx>{`
         .employees-wrapper { width: 100%; }
-        .table-container { overflow-x: auto; padding: 0; }
+        
+        /* ── Stats Grid ── */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.25rem;
+          margin-bottom: 1.5rem;
+        }
+        .stat-card {
+          position: relative;
+          border-radius: var(--radius-lg);
+          padding: 1.25rem;
+          overflow: hidden;
+          box-shadow: var(--shadow);
+          color: #fff;
+        }
+        .bg-blue-gradient {
+          background: linear-gradient(135deg, var(--accent), #1A44B8);
+        }
+        .bg-orange-gradient {
+          background: linear-gradient(135deg, #f59e0b, #f97316);
+        }
+        .bg-green-gradient {
+          background: linear-gradient(135deg, #10b981, #059669);
+        }
+        .stat-icon-wrapper {
+          background: rgba(255, 255, 255, 0.15);
+          width: fit-content;
+          padding: 0.5rem;
+          border-radius: 8px;
+          margin-bottom: 0.75rem;
+        }
+        .stat-ghost-icon {
+          position: absolute;
+          left: -1rem;
+          bottom: -1rem;
+          opacity: 0.2;
+          transform: rotate(12deg);
+        }
+        .stat-content {
+          position: relative;
+          z-index: 10;
+        }
+        .stat-content h3 {
+          font-size: 1.75rem;
+          margin: 0 0 0.25rem;
+          font-weight: 800;
+          line-height: 1.1;
+        }
+        .stat-content p {
+          margin: 0;
+          font-size: 0.875rem;
+          font-weight: 500;
+          opacity: 0.95;
+        }
+
+        .table-container { 
+          overflow-x: auto; 
+          padding: 0; 
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+        .table-container::-webkit-scrollbar {
+          display: none; /* Chrome, Safari and Opera */
+        }
 
         /* ── Desktop table ── */
         .table-desktop { display: block; }
@@ -164,15 +256,20 @@ export default function EmployeesPage() {
           font-weight: 700;
           text-decoration: none;
           white-space: nowrap;
-          background: var(--primary);
-          color: #000;
+          background: linear-gradient(135deg, var(--accent), #1A44B8);
+          color: #fff;
           border: none;
           cursor: pointer;
-          transition: background 0.15s, transform 0.12s;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           letter-spacing: 0.01em;
+          gap: 0.4rem;
+          box-shadow: 0 4px 12px rgba(0, 112, 192, 0.25);
         }
-        .btn-view:hover { background: var(--primary-hover); transform: translateY(-1px); }
-        .btn-view:active { transform: translateY(0); }
+        .btn-view:hover { 
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 6px 16px rgba(0, 112, 192, 0.4);
+        }
+        .btn-view:active { transform: translateY(0) scale(1); }
 
         .loading-state, .empty-state {
           padding: 3rem;

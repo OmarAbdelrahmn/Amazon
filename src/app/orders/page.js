@@ -24,8 +24,8 @@ export default function OrdersPage() {
       nameEN: r.nameEN,
       jobTitle: r.jobTitle,
       housingName: r.housingName,
-      minutesElapsed: r.currentOrderStartedAt 
-        ? (new Date() - new Date(r.currentOrderStartedAt)) / 60000 
+      minutesElapsed: r.currentOrderStartedAt
+        ? (new Date() - new Date(r.currentOrderStartedAt)) / 60000
         : 0,
     }));
   }, [riders]);
@@ -52,8 +52,28 @@ export default function OrdersPage() {
     setRidersLoading(true);
     setRidersError('');
     try {
-      const ridersData = await apiService.getEmployees();
-      setRiders(ridersData);
+      // Use the new dispatch endpoint instead of all employees
+      const res = await apiService.getDispatchAll();
+
+      // The response contains a 'riders' array. We only want riders who have a shift today and are not on break.
+      let activeRiders = [];
+      if (res && res.riders) {
+        activeRiders = res.riders.filter(r => r.hasShift && !r.isBreakDay);
+
+        // Ensure iqamaNo is present (fallback to riderId if the new schema named it differently)
+        activeRiders = activeRiders.map(r => ({
+          ...r,
+          iqamaNo: r.iqamaNo || r.riderId
+        }));
+      } else if (Array.isArray(res)) {
+        // Fallback just in case the endpoint returns an array directly
+        activeRiders = res.filter(r => r.hasShift && !r.isBreakDay).map(r => ({
+          ...r,
+          iqamaNo: r.iqamaNo || r.riderId
+        }));
+      }
+
+      setRiders(activeRiders);
     } catch (err) {
       setRidersError(err.title || err.message || 'Failed to load data.');
     } finally {
@@ -157,7 +177,7 @@ export default function OrdersPage() {
             onSelect={handleRiderSelect}
             submittingId={submittingId}
             successId={successId}
-            externalRiders={riders}
+            externalRiders={riders || []}
             loadingExternal={ridersLoading && !riders}
           />
         </div>

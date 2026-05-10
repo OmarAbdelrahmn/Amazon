@@ -65,11 +65,11 @@ export default function EmployeeDetailsPage() {
               <p className="text-secondary mt-1">{t('iqama_no')}: {data.iqamaNo} • {t('housing')}: {data.housingName}</p>
             </div>
             <div className="profile-stats">
-              <div className="stat-box">
+              <div className="stat-box bg-blue-gradient">
                 <div className="stat-label">{t('total_orders_all_time')}</div>
                 <div className="stat-val">{data.totalOrders}</div>
               </div>
-              <div className="stat-box">
+              <div className="stat-box bg-orange-gradient">
                 <div className="stat-label">{t('avg_mins')}</div>
                 <div className="stat-val">{data.averageMinutesPerOrder ? data.averageMinutesPerOrder.toFixed(1) : 0}</div>
               </div>
@@ -143,16 +143,32 @@ export default function EmployeeDetailsPage() {
 
         .profile-stats { display: flex; gap: 1rem; flex-wrap: wrap; }
         .stat-box {
-          background: rgba(0,0,0,0.02);
-          padding: 0.9rem 1.25rem;
-          border-radius: 12px;
-          border: 1px solid var(--border);
-          min-width: 110px;
+          padding: 1rem 1.5rem;
+          border-radius: var(--radius-lg);
+          min-width: 140px;
+          color: white;
+          box-shadow: var(--shadow);
+          position: relative;
+          overflow: hidden;
         }
-        .stat-label { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.4rem; }
-        .stat-val { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 0.85rem; font-weight: 600; opacity: 0.9; margin-bottom: 0.4rem; }
+        .stat-val { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
+        .bg-blue-gradient {
+          background: linear-gradient(135deg, var(--accent), #1A44B8);
+        }
+        .bg-orange-gradient {
+          background: linear-gradient(135deg, #f59e0b, #f97316);
+        }
 
-        .table-container { overflow-x: auto; }
+        .table-container { 
+          overflow-x: auto; 
+          padding: 0; 
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .table-container::-webkit-scrollbar {
+          display: none;
+        }
         .data-table { width: 100%; border-collapse: collapse; text-align: left; }
         [dir="rtl"] .data-table { text-align: right; }
         .data-table th, .data-table td {
