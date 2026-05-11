@@ -24,11 +24,12 @@ export default function OrdersPage() {
       nameEN: r.nameEN,
       jobTitle: r.jobTitle,
       housingName: r.housingName,
-      minutesElapsed: r.currentOrderStartedAt
-        ? (new Date() - new Date(r.currentOrderStartedAt)) / 60000
+      minutesElapsed: r.lastOrderAt
+        ? (new Date() - new Date(r.lastOrderAt)) / 60000
         : 0,
     }));
   }, [riders]);
+
   const totalActiveOrders = activeOrders.length;
 
   /* ── rider submit state ───────────────────────────────────────── */
@@ -117,18 +118,18 @@ export default function OrdersPage() {
 
   /* ── instant rider select → create order ─────────────────────── */
   const handleRiderSelect = async (rider, note) => {
-    setSubmittingId(rider.iqamaNo);
+    setSubmittingId(rider.employeeIqamaNo);
     setSubmitError('');
     clearTimeout(successTimer.current);
 
     try {
       await apiService.createOrder({
-        employeeIqamaNo: rider.iqamaNo,
+        employeeIqamaNo: rider.employeeIqamaNo,
         order: true,
         notes: note || undefined,
       });
 
-      setSuccessId(rider.iqamaNo);
+      setSuccessId(rider.employeeIqamaNo);
       successTimer.current = setTimeout(() => setSuccessId(null), 1800);
       showToast(
         isArabic
