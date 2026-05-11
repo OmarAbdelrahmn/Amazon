@@ -19,7 +19,7 @@ export default function OrdersPage() {
   const activeOrders = useMemo(() => {
     if (!riders) return [];
     return riders.filter(r => r.isCurrentlyOnOrder).map(r => ({
-      iqamaNo: r.iqamaNo,
+      employeeIqamaNo: r.employeeIqamaNo,
       nameAR: r.nameAR,
       nameEN: r.nameEN,
       jobTitle: r.jobTitle,
@@ -84,6 +84,14 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchRiders();
+  }, [fetchRiders]);
+
+  /* ── auto refresh every 1 min ────────────────────────────────── */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchRiders();
+    }, 20000);
+    return () => clearInterval(interval);
   }, [fetchRiders]);
 
   /* ── close single order ───────────────────────────────────────── */
@@ -226,7 +234,7 @@ export default function OrdersPage() {
           ) : activeOrders.length > 0 ? (
             <div className="op-order-list">
               {activeOrders.map(order => (
-                <div key={order.iqamaNo} className="op-order-card">
+                <div key={order.employeeIqamaNo} className="op-order-card">
                   <div className="op-order-info">
                     <p className="op-order-name">
                       {isArabic ? order.nameAR : order.nameEN}
@@ -245,7 +253,7 @@ export default function OrdersPage() {
                   </div>
                   <button
                     className="op-close-btn"
-                    onClick={() => handleCloseOrder(order.iqamaNo)}
+                    onClick={() => handleCloseOrder(order.employeeIqamaNo)}
                     disabled={closeLoading}
                     aria-label={isArabic ? 'إغلاق الطلب' : 'Close order'}
                   >

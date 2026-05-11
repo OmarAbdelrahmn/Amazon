@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiService } from '@/services/api';
-import { Users, Package, Clock, CheckCircle, Eye } from 'lucide-react';
+import { Users, Package, Clock, CheckCircle, Eye, Search } from 'lucide-react';
 
 export default function EmployeesPage() {
   const { t, i18n } = useTranslation('common');
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const isArabic = i18n.language === 'ar';
   const dir = isArabic ? 'rtl' : 'ltr';
@@ -64,6 +65,18 @@ export default function EmployeesPage() {
 
       {error && <div className="error-alert" style={{ marginBottom: '1rem' }}>{error}</div>}
 
+      <div className="search-bar-container mb-4">
+        <div className="search-input-wrapper">
+          <input
+            type="text"
+            placeholder={isArabic ? 'البحث برقم الإقامة...' : 'Search by Iqama number...'}
+            className="search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="glass-card table-container">
         {loading ? (
           <div className="loading-state">{t('loading')}...</div>
@@ -85,7 +98,7 @@ export default function EmployeesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {employees.map(emp => (
+                  {employees.filter(emp => String(emp.iqamaNo || '').includes(searchTerm)).map(emp => (
                     <tr key={emp.iqamaNo}>
                       <td>{emp.iqamaNo}</td>
                       <td className="font-medium">{isArabic ? emp.nameAR : emp.nameEN}</td>
@@ -110,7 +123,7 @@ export default function EmployeesPage() {
 
             {/* ── Mobile card list ── */}
             <div className="table-mobile">
-              {employees.map(emp => (
+              {employees.filter(emp => String(emp.iqamaNo || '').includes(searchTerm)).map(emp => (
                 <div key={emp.iqamaNo} className="emp-card">
                   <div className="emp-card-top">
                     <div className="emp-card-info">
@@ -313,6 +326,49 @@ export default function EmployeesPage() {
           .table-mobile { display: block; }
           .table-container { padding: 0; }
         }
+
+        /* ── Search Bar ── */
+        .search-bar-container {
+          display: flex;
+          width: 100%;
+          margin-bottom: 1.5rem;
+        }
+        .search-input-wrapper {
+          position: relative;
+          flex: 1;
+          display: flex;
+          align-items: center;
+        }
+        .search-icon {
+          position: absolute;
+          left: 1rem;
+          color: var(--text-tertiary);
+          pointer-events: none;
+        }
+        [dir='rtl'] .search-icon {
+          left: auto;
+          right: 1rem;
+        }
+        .search-input {
+          width: 100%;
+          padding: 0.75rem 1rem 0.75rem 2.75rem;
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          background: var(--surface);
+          font-size: 0.95rem;
+          transition: all 0.2s;
+          color: var(--text);
+        }
+        [dir='rtl'] .search-input {
+          padding: 0.75rem 2.75rem 0.75rem 1rem;
+        }
+        .search-input:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(0, 112, 192, 0.1);
+          background: #fff;
+        }
+        .mb-4 { margin-bottom: 1rem; }
       `}</style>
     </div>
   );

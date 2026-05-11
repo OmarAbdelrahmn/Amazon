@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { apiService } from '@/services/api';
-import { Users, Calendar, Clock, AlertCircle, FileSpreadsheet, Upload } from 'lucide-react';
+import { Users, Calendar, Clock, AlertCircle, FileSpreadsheet, Upload, Search } from 'lucide-react';
 
 export default function ShiftsPage() {
   const { t, i18n } = useTranslation('common');
@@ -22,6 +22,7 @@ export default function ShiftsPage() {
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Edit State
   const [editingShift, setEditingShift] = useState(null); // { riderId, shiftDate, shiftIndex, startTime, durationHours, isBreakDay }
@@ -197,6 +198,18 @@ export default function ShiftsPage() {
             })}
           </div>
 
+          <div className="search-bar-container mb-4">
+            <div className="search-input-wrapper">
+              <input
+                type="text"
+                placeholder={isArabic ? 'البحث باسم السائق...' : 'Search by rider name...'}
+                className="search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="glass-card no-pad">
             <div className="table-container">
               <table className="data-table">
@@ -210,7 +223,10 @@ export default function ShiftsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.riders?.map(rider => {
+                  {data.riders?.filter(rider => {
+                    const term = searchTerm.toLowerCase();
+                    return (rider.nameEN?.toLowerCase().includes(term) || rider.nameAR?.includes(term));
+                  }).map(rider => {
                     const shift1 = rider.shifts?.find(s => s.shiftIndex === 1);
                     const shift2 = rider.shifts?.find(s => s.shiftIndex === 2);
 
@@ -471,6 +487,47 @@ export default function ShiftsPage() {
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(2px); }
         .modal-content { width: 100%; max-width: 400px; box-shadow: var(--shadow-xl); }
+
+        /* ── Search Bar ── */
+        .search-bar-container {
+          display: flex;
+          width: 100%;
+        }
+        .search-input-wrapper {
+          position: relative;
+          flex: 1;
+          display: flex;
+          align-items: center;
+        }
+        .search-icon {
+          position: absolute;
+          left: 1rem;
+          color: var(--text-tertiary);
+          pointer-events: none;
+        }
+        [dir='rtl'] .search-icon {
+          left: auto;
+          right: 1rem;
+        }
+        .search-input {
+          width: 100%;
+          padding: 0.75rem 1rem 0.75rem 2.75rem;
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          background: var(--surface);
+          font-size: 0.95rem;
+          transition: all 0.2s;
+          color: var(--text);
+        }
+        [dir='rtl'] .search-input {
+          padding: 0.75rem 2.75rem 0.75rem 1rem;
+        }
+        .search-input:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(0, 112, 192, 0.1);
+          background: #fff;
+        }
       `}</style>
     </div>
   );
