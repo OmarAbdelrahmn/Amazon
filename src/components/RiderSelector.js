@@ -68,6 +68,51 @@ export default function RiderSelector({
       : `${BASE_URL}/${rider.profileImagePath.replace(/^\//, '')}`;
   };
 
+  /**
+   * Calculate actual elapsed working hours by summing only the time
+   * the rider has been *inside* a shift window, ignoring gaps/breaks.
+   * Shifts with no startTime are skipped.
+   */
+  const calcWorkingHours = (shifts) => {
+    if (!shifts || shifts.length === 0) return null;
+    const now = new Date();
+    let totalMs = 0;
+
+    for (const shift of shifts) {
+      if (!shift.startTime) continue;
+
+      const [sh, sm] = shift.startTime.split(':').map(Number);
+      const shiftStart = new Date(now);
+      shiftStart.setHours(sh, sm, 0, 0);
+      // If the start appears in the future, it actually started yesterday (e.g. night shift)
+      if (shiftStart > now) shiftStart.setDate(shiftStart.getDate() - 1);
+
+      let shiftEnd;
+      if (shift.endTime) {
+        const [eh, em] = shift.endTime.split(':').map(Number);
+        shiftEnd = new Date(shiftStart);
+        shiftEnd.setHours(eh, em, 0, 0);
+        // End before start means it crosses midnight
+        if (shiftEnd <= shiftStart) shiftEnd.setDate(shiftEnd.getDate() + 1);
+      } else {
+        // Ongoing shift — use current time as the end
+        shiftEnd = now;
+      }
+
+      // Skip shifts that haven't started yet
+      if (now < shiftStart) continue;
+
+      const effectiveEnd = now < shiftEnd ? now : shiftEnd;
+      totalMs += effectiveEnd - shiftStart;
+    }
+
+    const totalMins = totalMs / 60000;
+    if (totalMins <= 0) return null;
+    const h = Math.floor(totalMins / 60);
+    const m = Math.floor(totalMins % 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+
   /* ── render ───────────────────────────────────────────────────── */
   return (
     <div className="rs-wrapper" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -88,6 +133,7 @@ export default function RiderSelector({
             const isSubmitting = submittingId === rider.iqamaNo;
             const isSuccess = successId === rider.iqamaNo;
             const isDisabled = !!submittingId && !isSubmitting;
+            const workingHours = calcWorkingHours(rider.shifts);
 
             return (
               <div
@@ -145,6 +191,21 @@ export default function RiderSelector({
                     {rider.totalOrdersToday !== undefined && (
                       <div className="rs-orders-badge" title={isRtl ? 'طلبات اليوم' : 'Orders Today'}>
                         {rider.totalOrdersToday}
+                      </div>
+                    )}
+
+                    {/* working hours badge — bottom left */}
+                    {workingHours && (
+                      <div
+                        className="rs-hours-badge"
+                        title={isRtl ? 'ساعات العمل الفعلية' : 'Actual Working Hours'}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                          strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        {workingHours}
                       </div>
                     )}
                   </div>
@@ -342,6 +403,30 @@ export default function RiderSelector({
           z-index: 5;
         }
         [dir='rtl'] .rs-orders-badge { right: auto; left: -3px; }
+
+        /* ── working hours badge ─────────────────────────── */
+        .rs-hours-badge {
+          position: absolute;
+          bottom: -3px;
+          left: -3px;
+          background: #7c788aff;
+          color: #ffffffff;
+          font-size: 0.62rem;
+          font-weight: 700;
+          height: 22px;
+          padding: 0 6px 0 4px;
+          border-radius: 11px;
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          border: 2.5px solid var(--surface);
+          box-shadow: 0 2px 6px rgba(88, 99, 255, 0.22);
+          z-index: 5;
+          white-space: nowrap;
+        }
+        .rs-hours-badge svg { width: 10px; height: 10px; flex-shrink: 0; }
+        [dir='rtl'] .rs-hours-badge { left: auto; right: -3px; }
+
 
         /* ── names ───────────────────────────────────────── */
         .rs-names {

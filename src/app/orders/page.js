@@ -49,6 +49,43 @@ export default function OrdersPage() {
   };
 
   /* ── fetch riders ────────────────────────────────────────────── */
+
+  /**
+   * Returns true if the current time falls inside at least one of the
+   * rider's shifts. Gaps between shifts (breaks) are correctly excluded.
+   * A shift with no endTime is treated as ongoing for its durationHours.
+   */
+  const isShiftNowActive = (shifts) => {
+    if (!shifts || shifts.length === 0) return false;
+    const now = new Date();
+
+    for (const shift of shifts) {
+      if (!shift.startTime) continue;
+
+      const [sh, sm] = shift.startTime.split(':').map(Number);
+      const shiftStart = new Date(now);
+      shiftStart.setHours(sh, sm, 0, 0);
+      // If start appears in the future, this is a night shift that began yesterday
+      if (shiftStart > now) shiftStart.setDate(shiftStart.getDate() - 1);
+
+      let shiftEnd;
+      if (shift.endTime) {
+        const [eh, em] = shift.endTime.split(':').map(Number);
+        shiftEnd = new Date(shiftStart);
+        shiftEnd.setHours(eh, em, 0, 0);
+        // Crosses midnight
+        if (shiftEnd <= shiftStart) shiftEnd.setDate(shiftEnd.getDate() + 1);
+      } else {
+        // No explicit end — fall back to durationHours
+        const dur = shift.durationHours || 0;
+        shiftEnd = new Date(shiftStart.getTime() + dur * 3600000);
+      }
+
+      if (now >= shiftStart && now < shiftEnd) return true;
+    }
+    return false;
+  };
+
   const fetchRiders = useCallback(async () => {
     setRidersLoading(true);
     setRidersError('');
@@ -56,22 +93,22 @@ export default function OrdersPage() {
       // Use the new dispatch endpoint instead of all employees
       const res = await apiService.getDispatchAll();
 
-      // The response contains a 'riders' array. We only want riders who have a shift today and are not on break.
+      // Only show riders whose shift is currently active right now
       let activeRiders = [];
       if (res && res.riders) {
-        activeRiders = res.riders.filter(r => r.hasShift && !r.isBreakDay);
-
-        // Ensure iqamaNo is present (fallback to riderId if the new schema named it differently)
-        activeRiders = activeRiders.map(r => ({
-          ...r,
-          iqamaNo: r.iqamaNo || r.riderId
-        }));
+        activeRiders = res.riders
+          .filter(r => r.hasShift && !r.isBreakDay && isShiftNowActive(r.shifts))
+          .map(r => ({
+            ...r,
+            iqamaNo: r.iqamaNo || r.riderId
+          }));
       } else if (Array.isArray(res)) {
-        // Fallback just in case the endpoint returns an array directly
-        activeRiders = res.filter(r => r.hasShift && !r.isBreakDay).map(r => ({
-          ...r,
-          iqamaNo: r.iqamaNo || r.riderId
-        }));
+        activeRiders = res
+          .filter(r => r.hasShift && !r.isBreakDay && isShiftNowActive(r.shifts))
+          .map(r => ({
+            ...r,
+            iqamaNo: r.iqamaNo || r.riderId
+          }));
       }
 
       setRiders(activeRiders);
@@ -81,6 +118,7 @@ export default function OrdersPage() {
       setRidersLoading(false);
     }
   }, []);
+
 
   useEffect(() => {
     fetchRiders();
