@@ -2,6 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import * as XLSX from 'xlsx';
 import { apiService } from '@/services/api';
 import { Users, Calendar, Clock, AlertCircle, FileSpreadsheet, Upload, Search } from 'lucide-react';
@@ -290,8 +291,8 @@ export default function ShiftsPage() {
         </div>
       ) : null}
 
-      {/* Edit Modal */}
-      {editingShift && (
+      {/* Edit Modal — rendered via portal so position:fixed works against the viewport */}
+      {editingShift && typeof document !== 'undefined' && createPortal(
         <div className="modal-overlay" onClick={() => setEditingShift(null)}>
           <div className="modal-content glass-card animate-fade-in" onClick={e => e.stopPropagation()}>
             <h3 className="mb-4">{isArabic ? 'تعديل الوردية' : 'Edit Shift'} {editingShift.shiftIndex}</h3>
@@ -337,7 +338,8 @@ export default function ShiftsPage() {
               <button className="btn-primary" onClick={saveShift}>{isArabic ? 'حفظ الوردية' : 'Save Shift'}</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style jsx>{`
